@@ -1,0 +1,8 @@
+{
+  "totalSpending": 343,
+  "perCategoryTotals": { "Subscription": 253, "Meals": 90 },
+  "top3Categories": [
+    { "category": "Subscription", "amount": 253 },
+    { "category": "Meals", "amount": 90 }
+  ]
+}

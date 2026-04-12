@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: financial-assistant-backend
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    healthCheckPath: /health
+    envVars:
+      - key: DATA_DIR
+        value: /tmp/financial-assistant-data

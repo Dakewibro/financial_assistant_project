@@ -1,0 +1,13 @@
+{
+  "categories": ["Meals", "Transport", "Subscription", "Shopping", "Uncategorized"],
+  "rules": [
+    { "id": "tr1", "ruleType": "period_cap", "period": "monthly", "threshold": 300, "enabled": true },
+    { "id": "tr2", "ruleType": "category_percentage", "category": "Transport", "period": "monthly", "threshold": 30, "enabled": true }
+  ],
+  "transactions": [
+    { "id": "t1", "date": "2026-03-01", "amount": 80, "category": "Transport", "description": "MTR top-up", "createdAt": "2026-03-01T08:00:00.000Z" },
+    { "id": "t2", "date": "2026-03-06", "amount": 120, "category": "Transport", "description": "Taxi rides", "createdAt": "2026-03-06T18:00:00.000Z" },
+    { "id": "t3", "date": "2026-03-11", "amount": 90, "category": "Transport", "description": "Airport train", "createdAt": "2026-03-11T07:00:00.000Z" },
+    { "id": "t4", "date": "2026-03-12", "amount": 50, "category": "Meals", "description": "Lunch", "createdAt": "2026-03-12T13:00:00.000Z" }
+  ]
+}

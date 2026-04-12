@@ -1,0 +1,7 @@
+[
+  {
+    "ruleType": "category_cap",
+    "message": "Meals daily cap exceeded",
+    "evidence": "65 > 50 today"
+  }
+]

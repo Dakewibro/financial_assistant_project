@@ -1,0 +1,4 @@
+[
+  { "ruleType": "category_percentage", "category": "Subscription", "period": "monthly", "threshold": 25, "enabled": true },
+  { "ruleType": "period_cap", "period": "monthly", "threshold": 500, "enabled": true }
+]

@@ -1,0 +1,8 @@
+{
+  "totalSpending": 340,
+  "perCategoryTotals": { "Transport": 290, "Meals": 50 },
+  "top3Categories": [
+    { "category": "Transport", "amount": 290 },
+    { "category": "Meals", "amount": 50 }
+  ]
+}

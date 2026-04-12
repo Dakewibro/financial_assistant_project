@@ -1,0 +1,11 @@
+{
+  "categories": ["Meals", "Transport", "Subscription", "Shopping", "Uncategorized"],
+  "rules": [
+    { "id": "u1", "ruleType": "uncategorized_warning", "period": "monthly", "threshold": 2, "enabled": true }
+  ],
+  "transactions": [
+    { "id": "u1t", "date": "2026-03-05", "amount": 25, "category": "Uncategorized", "description": "Cash payment", "createdAt": "2026-03-05T10:00:00.000Z" },
+    { "id": "u2t", "date": "2026-03-06", "amount": 20, "category": "Uncategorized", "description": "Snacks", "createdAt": "2026-03-06T14:00:00.000Z" },
+    { "id": "u3t", "date": "2026-03-06", "amount": 16, "category": "Uncategorized", "description": "Stationery", "createdAt": "2026-03-06T18:00:00.000Z" }
+  ]
+}

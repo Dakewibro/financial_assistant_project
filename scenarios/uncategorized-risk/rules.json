@@ -1,0 +1,3 @@
+[
+  { "ruleType": "uncategorized_warning", "period": "monthly", "threshold": 2, "enabled": true }
+]

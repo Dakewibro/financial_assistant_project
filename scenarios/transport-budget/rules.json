@@ -1,0 +1,4 @@
+[
+  { "ruleType": "period_cap", "period": "monthly", "threshold": 300, "enabled": true },
+  { "ruleType": "category_percentage", "category": "Transport", "period": "monthly", "threshold": 30, "enabled": true }
+]
