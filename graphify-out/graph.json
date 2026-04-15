@@ -27,7 +27,7 @@
       "source_file": "frontend/src/App.tsx",
       "source_location": "L1",
       "id": "frontend_src_app_tsx",
-      "community": 3,
+      "community": 1,
       "norm_label": "app.tsx"
     },
     {
@@ -36,7 +36,7 @@
       "source_file": "frontend/src/App.tsx",
       "source_location": "L25",
       "id": "app_load",
-      "community": 3,
+      "community": 1,
       "norm_label": "load()"
     },
     {
@@ -45,7 +45,7 @@
       "source_file": "frontend/src/App.tsx",
       "source_location": "L40",
       "id": "app_addtransaction",
-      "community": 3,
+      "community": 1,
       "norm_label": "addtransaction()"
     },
     {
@@ -54,7 +54,7 @@
       "source_file": "frontend/src/App.tsx",
       "source_location": "L47",
       "id": "app_addrule",
-      "community": 3,
+      "community": 1,
       "norm_label": "addrule()"
     },
     {
@@ -63,7 +63,7 @@
       "source_file": "frontend/src/App.tsx",
       "source_location": "L52",
       "id": "app_runscenario",
-      "community": 3,
+      "community": 1,
       "norm_label": "runscenario()"
     },
     {
@@ -72,7 +72,7 @@
       "source_file": "frontend/src/main.tsx",
       "source_location": "L1",
       "id": "frontend_src_main_tsx",
-      "community": 3,
+      "community": 1,
       "norm_label": "main.tsx"
     },
     {
@@ -90,7 +90,7 @@
       "source_file": "frontend/src/components/ui.tsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_tsx",
-      "community": 4,
+      "community": 3,
       "norm_label": "ui.tsx"
     },
     {
@@ -99,7 +99,7 @@
       "source_file": "frontend/src/components/ui.tsx",
       "source_location": "L3",
       "id": "ui_sectioncard",
-      "community": 4,
+      "community": 3,
       "norm_label": "sectioncard()"
     },
     {
@@ -108,7 +108,7 @@
       "source_file": "frontend/src/components/ui.tsx",
       "source_location": "L25",
       "id": "ui_input",
-      "community": 4,
+      "community": 3,
       "norm_label": "input()"
     },
     {
@@ -117,7 +117,7 @@
       "source_file": "frontend/src/components/ui.tsx",
       "source_location": "L29",
       "id": "ui_select",
-      "community": 4,
+      "community": 3,
       "norm_label": "select()"
     },
     {
@@ -130,19 +130,10 @@
       "norm_label": "client.ts"
     },
     {
-      "label": "apiUrl()",
-      "file_type": "code",
-      "source_file": "frontend/src/api/client.ts",
-      "source_location": "L5",
-      "id": "client_apiurl",
-      "community": 2,
-      "norm_label": "apiurl()"
-    },
-    {
       "label": "request()",
       "file_type": "code",
       "source_file": "frontend/src/api/client.ts",
-      "source_location": "L9",
+      "source_location": "L5",
       "id": "client_request",
       "community": 2,
       "norm_label": "request()"
@@ -151,7 +142,7 @@
       "label": "fetchBootstrap()",
       "file_type": "code",
       "source_file": "frontend/src/api/client.ts",
-      "source_location": "L17",
+      "source_location": "L13",
       "id": "client_fetchbootstrap",
       "community": 2,
       "norm_label": "fetchbootstrap()"
@@ -160,7 +151,7 @@
       "label": "createTransaction()",
       "file_type": "code",
       "source_file": "frontend/src/api/client.ts",
-      "source_location": "L21",
+      "source_location": "L17",
       "id": "client_createtransaction",
       "community": 2,
       "norm_label": "createtransaction()"
@@ -169,7 +160,7 @@
       "label": "createRule()",
       "file_type": "code",
       "source_file": "frontend/src/api/client.ts",
-      "source_location": "L35",
+      "source_location": "L31",
       "id": "client_createrule",
       "community": 2,
       "norm_label": "createrule()"
@@ -178,7 +169,7 @@
       "label": "importScenario()",
       "file_type": "code",
       "source_file": "frontend/src/api/client.ts",
-      "source_location": "L49",
+      "source_location": "L45",
       "id": "client_importscenario",
       "community": 2,
       "norm_label": "importscenario()"
@@ -256,21 +247,12 @@
       "norm_label": "summaryalert.test.ts"
     },
     {
-      "label": "summaryAlert.test.js",
-      "file_type": "code",
-      "source_file": "backend/tests/summaryAlert.test.js",
-      "source_location": "L1",
-      "id": "backend_tests_summaryalert_test_js",
-      "community": 15,
-      "norm_label": "summaryalert.test.js"
-    },
-    {
       "label": "index.ts",
       "file_type": "code",
       "source_file": "backend/api/index.ts",
       "source_location": "L1",
       "id": "backend_api_index_ts",
-      "community": 16,
+      "community": 15,
       "norm_label": "index.ts"
     },
     {
@@ -279,7 +261,7 @@
       "source_file": "backend/src/validation.ts",
       "source_location": "L1",
       "id": "backend_src_validation_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "validation.ts"
     },
     {
@@ -288,70 +270,34 @@
       "source_file": "backend/src/repository.ts",
       "source_location": "L1",
       "id": "backend_src_repository_ts",
-      "community": 0,
+      "community": 4,
       "norm_label": "repository.ts"
-    },
-    {
-      "label": "shouldUseMongoStore()",
-      "file_type": "code",
-      "source_file": "backend/src/repository.ts",
-      "source_location": "L58",
-      "id": "repository_shouldusemongostore",
-      "community": 0,
-      "norm_label": "shouldusemongostore()"
-    },
-    {
-      "label": "ensureMongoConnected()",
-      "file_type": "code",
-      "source_file": "backend/src/repository.ts",
-      "source_location": "L62",
-      "id": "repository_ensuremongoconnected",
-      "community": 0,
-      "norm_label": "ensuremongoconnected()"
-    },
-    {
-      "label": "ensureMongoStore()",
-      "file_type": "code",
-      "source_file": "backend/src/repository.ts",
-      "source_location": "L80",
-      "id": "repository_ensuremongostore",
-      "community": 0,
-      "norm_label": "ensuremongostore()"
-    },
-    {
-      "label": "resolveDataDir()",
-      "file_type": "code",
-      "source_file": "backend/src/repository.ts",
-      "source_location": "L91",
-      "id": "repository_resolvedatadir",
-      "community": 0,
-      "norm_label": "resolvedatadir()"
     },
     {
       "label": "ensureStore()",
       "file_type": "code",
       "source_file": "backend/src/repository.ts",
-      "source_location": "L102",
+      "source_location": "L20",
       "id": "repository_ensurestore",
-      "community": 0,
+      "community": 4,
       "norm_label": "ensurestore()"
     },
     {
       "label": "loadStore()",
       "file_type": "code",
       "source_file": "backend/src/repository.ts",
-      "source_location": "L111",
+      "source_location": "L29",
       "id": "repository_loadstore",
-      "community": 0,
+      "community": 4,
       "norm_label": "loadstore()"
     },
     {
       "label": "saveStore()",
       "file_type": "code",
       "source_file": "backend/src/repository.ts",
-      "source_location": "L136",
+      "source_location": "L44",
       "id": "repository_savestore",
-      "community": 0,
+      "community": 4,
       "norm_label": "savestore()"
     },
     {
@@ -360,7 +306,7 @@
       "source_file": "backend/src/alertService.ts",
       "source_location": "L1",
       "id": "backend_src_alertservice_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "alertservice.ts"
     },
     {
@@ -369,7 +315,7 @@
       "source_file": "backend/src/alertService.ts",
       "source_location": "L8",
       "id": "alertservice_createalert",
-      "community": 1,
+      "community": 0,
       "norm_label": "createalert()"
     },
     {
@@ -378,7 +324,7 @@
       "source_file": "backend/src/alertService.ts",
       "source_location": "L16",
       "id": "alertservice_evaluatealerts",
-      "community": 1,
+      "community": 0,
       "norm_label": "evaluatealerts()"
     },
     {
@@ -387,7 +333,7 @@
       "source_file": "backend/src/app.ts",
       "source_location": "L1",
       "id": "backend_src_app_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "app.ts"
     },
     {
@@ -396,7 +342,7 @@
       "source_file": "backend/src/types.ts",
       "source_location": "L1",
       "id": "backend_src_types_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "types.ts"
     },
     {
@@ -405,17 +351,8 @@
       "source_file": "backend/src/server.ts",
       "source_location": "L1",
       "id": "backend_src_server_ts",
-      "community": 1,
+      "community": 0,
       "norm_label": "server.ts"
-    },
-    {
-      "label": "start()",
-      "file_type": "code",
-      "source_file": "backend/src/server.ts",
-      "source_location": "L6",
-      "id": "server_start",
-      "community": 1,
-      "norm_label": "start()"
     },
     {
       "label": "summaryService.ts",
@@ -454,21 +391,12 @@
       "norm_label": "computesummary()"
     },
     {
-      "label": "schemas.ts",
-      "file_type": "code",
-      "source_file": "shared/schemas.ts",
-      "source_location": "L1",
-      "id": "shared_schemas_ts",
-      "community": 17,
-      "norm_label": "schemas.ts"
-    },
-    {
       "label": "generate-test-data.js",
       "file_type": "code",
       "source_file": "scripts/generate-test-data.js",
       "source_location": "L1",
       "id": "scripts_generate_test_data_js",
-      "community": 18,
+      "community": 16,
       "norm_label": "generate-test-data.js"
     }
   ],
@@ -612,18 +540,6 @@
       "source_location": "L5",
       "weight": 1.0,
       "_src": "frontend_src_api_client_ts",
-      "_tgt": "client_apiurl",
-      "source": "frontend_src_api_client_ts",
-      "target": "client_apiurl",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "frontend/src/api/client.ts",
-      "source_location": "L9",
-      "weight": 1.0,
-      "_src": "frontend_src_api_client_ts",
       "_tgt": "client_request",
       "source": "frontend_src_api_client_ts",
       "target": "client_request",
@@ -633,7 +549,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/api/client.ts",
-      "source_location": "L17",
+      "source_location": "L13",
       "weight": 1.0,
       "_src": "frontend_src_api_client_ts",
       "_tgt": "client_fetchbootstrap",
@@ -645,7 +561,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/api/client.ts",
-      "source_location": "L21",
+      "source_location": "L17",
       "weight": 1.0,
       "_src": "frontend_src_api_client_ts",
       "_tgt": "client_createtransaction",
@@ -657,7 +573,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/api/client.ts",
-      "source_location": "L35",
+      "source_location": "L31",
       "weight": 1.0,
       "_src": "frontend_src_api_client_ts",
       "_tgt": "client_createrule",
@@ -669,7 +585,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/api/client.ts",
-      "source_location": "L49",
+      "source_location": "L45",
       "weight": 1.0,
       "_src": "frontend_src_api_client_ts",
       "_tgt": "client_importscenario",
@@ -681,55 +597,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/api/client.ts",
-      "source_location": "L18",
-      "weight": 1.0,
-      "_src": "client_fetchbootstrap",
-      "_tgt": "client_apiurl",
-      "source": "client_apiurl",
-      "target": "client_fetchbootstrap",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "frontend/src/api/client.ts",
-      "source_location": "L22",
-      "weight": 1.0,
-      "_src": "client_createtransaction",
-      "_tgt": "client_apiurl",
-      "source": "client_apiurl",
-      "target": "client_createtransaction",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "frontend/src/api/client.ts",
-      "source_location": "L36",
-      "weight": 1.0,
-      "_src": "client_createrule",
-      "_tgt": "client_apiurl",
-      "source": "client_apiurl",
-      "target": "client_createrule",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "frontend/src/api/client.ts",
-      "source_location": "L51",
-      "weight": 1.0,
-      "_src": "client_importscenario",
-      "_tgt": "client_apiurl",
-      "source": "client_apiurl",
-      "target": "client_importscenario",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "frontend/src/api/client.ts",
-      "source_location": "L18",
+      "source_location": "L14",
       "weight": 1.0,
       "_src": "client_fetchbootstrap",
       "_tgt": "client_request",
@@ -741,7 +609,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/api/client.ts",
-      "source_location": "L22",
+      "source_location": "L18",
       "weight": 1.0,
       "_src": "client_createtransaction",
       "_tgt": "client_request",
@@ -753,7 +621,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/api/client.ts",
-      "source_location": "L36",
+      "source_location": "L32",
       "weight": 1.0,
       "_src": "client_createrule",
       "_tgt": "client_request",
@@ -765,7 +633,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/api/client.ts",
-      "source_location": "L50",
+      "source_location": "L46",
       "weight": 1.0,
       "_src": "client_importscenario",
       "_tgt": "client_request",
@@ -813,7 +681,7 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/repository.ts",
-      "source_location": "L4",
+      "source_location": "L3",
       "weight": 1.0,
       "_src": "backend_src_repository_ts",
       "_tgt": "backend_src_types_ts",
@@ -825,55 +693,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/repository.ts",
-      "source_location": "L58",
-      "weight": 1.0,
-      "_src": "backend_src_repository_ts",
-      "_tgt": "repository_shouldusemongostore",
-      "source": "backend_src_repository_ts",
-      "target": "repository_shouldusemongostore",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/src/repository.ts",
-      "source_location": "L62",
-      "weight": 1.0,
-      "_src": "backend_src_repository_ts",
-      "_tgt": "repository_ensuremongoconnected",
-      "source": "backend_src_repository_ts",
-      "target": "repository_ensuremongoconnected",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/src/repository.ts",
-      "source_location": "L80",
-      "weight": 1.0,
-      "_src": "backend_src_repository_ts",
-      "_tgt": "repository_ensuremongostore",
-      "source": "backend_src_repository_ts",
-      "target": "repository_ensuremongostore",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/src/repository.ts",
-      "source_location": "L91",
-      "weight": 1.0,
-      "_src": "backend_src_repository_ts",
-      "_tgt": "repository_resolvedatadir",
-      "source": "backend_src_repository_ts",
-      "target": "repository_resolvedatadir",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/src/repository.ts",
-      "source_location": "L102",
+      "source_location": "L20",
       "weight": 1.0,
       "_src": "backend_src_repository_ts",
       "_tgt": "repository_ensurestore",
@@ -885,7 +705,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/repository.ts",
-      "source_location": "L111",
+      "source_location": "L29",
       "weight": 1.0,
       "_src": "backend_src_repository_ts",
       "_tgt": "repository_loadstore",
@@ -897,7 +717,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/repository.ts",
-      "source_location": "L136",
+      "source_location": "L44",
       "weight": 1.0,
       "_src": "backend_src_repository_ts",
       "_tgt": "repository_savestore",
@@ -918,82 +738,10 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "imports_from",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/src/server.ts",
-      "source_location": "L2",
-      "weight": 1.0,
-      "_src": "backend_src_server_ts",
-      "_tgt": "backend_src_repository_ts",
-      "source": "backend_src_repository_ts",
-      "target": "backend_src_server_ts",
-      "confidence_score": 1.0
-    },
-    {
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/repository.ts",
-      "source_location": "L112",
-      "weight": 1.0,
-      "_src": "repository_loadstore",
-      "_tgt": "repository_shouldusemongostore",
-      "source": "repository_shouldusemongostore",
-      "target": "repository_loadstore",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/src/repository.ts",
-      "source_location": "L137",
-      "weight": 1.0,
-      "_src": "repository_savestore",
-      "_tgt": "repository_shouldusemongostore",
-      "source": "repository_shouldusemongostore",
-      "target": "repository_savestore",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/src/repository.ts",
-      "source_location": "L81",
-      "weight": 1.0,
-      "_src": "repository_ensuremongostore",
-      "_tgt": "repository_ensuremongoconnected",
-      "source": "repository_ensuremongoconnected",
-      "target": "repository_ensuremongostore",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/src/repository.ts",
-      "source_location": "L113",
-      "weight": 1.0,
-      "_src": "repository_loadstore",
-      "_tgt": "repository_ensuremongostore",
-      "source": "repository_ensuremongostore",
-      "target": "repository_loadstore",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/src/repository.ts",
-      "source_location": "L138",
-      "weight": 1.0,
-      "_src": "repository_savestore",
-      "_tgt": "repository_ensuremongostore",
-      "source": "repository_ensuremongostore",
-      "target": "repository_savestore",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/src/repository.ts",
-      "source_location": "L122",
+      "source_location": "L30",
       "weight": 1.0,
       "_src": "repository_loadstore",
       "_tgt": "repository_ensurestore",
@@ -1005,7 +753,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/repository.ts",
-      "source_location": "L153",
+      "source_location": "L45",
       "weight": 1.0,
       "_src": "repository_savestore",
       "_tgt": "repository_ensurestore",
@@ -1107,18 +855,6 @@
       "_tgt": "backend_src_types_ts",
       "source": "backend_src_types_ts",
       "target": "backend_src_summaryservice_ts",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/src/server.ts",
-      "source_location": "L6",
-      "weight": 1.0,
-      "_src": "backend_src_server_ts",
-      "_tgt": "server_start",
-      "source": "backend_src_server_ts",
-      "target": "server_start",
       "confidence_score": 1.0
     },
     {

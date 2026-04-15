@@ -7,16 +7,7 @@ import { computeSummary } from "./summaryService.js";
 import { budgetRuleSchema, categorySchema, transactionSchema } from "./validation.js";
 
 export const app = express();
-const allowedOrigins = (process.env.ALLOWED_ORIGINS ?? "")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
-
-app.use(
-  cors({
-    origin: allowedOrigins.length > 0 ? allowedOrigins : true,
-  })
-);
+app.use(cors());
 app.use(express.json({ limit: "1mb" }));
 
 app.get("/health", (_req, res) => {

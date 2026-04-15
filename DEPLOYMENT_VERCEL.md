@@ -31,8 +31,8 @@ Option B (manual web service setup):
 - Environment variables:
   - `MONGODB_URI` = your Atlas connection string (set as secret)
   - `MONGODB_DB` = `financial_assistant` (or your preferred DB name)
-  - `ALLOWED_ORIGINS` = comma-separated frontend origins, for example:
-    - `http://localhost:5173,https://<your-frontend>.vercel.app`
+  - `ALLOWED_ORIGINS` = comma-separated frontend origins:
+    - `http://localhost:5173,https://<your-frontend>.vercel.app,https://*.vercel.app`
 
 After deploy, note your backend URL, for example:
 `https://financial-assistant-backend.onrender.com`
@@ -43,20 +43,20 @@ After deploy, note your backend URL, for example:
 - Framework preset: `Vite`
 - Build command: `npm run build`
 - Output directory: `dist`
-- Environment variable:
-  - `VITE_API_BASE_URL` = your Render backend URL (example: `https://financial-assistant-backend.onrender.com`)
+- Optional environment variable:
+  - `VITE_DEV_API_PROXY_TARGET` for local dev only (defaults to `http://localhost:4000`)
 - Deploy
 
-The SPA fallback rewrite is configured in [`frontend/vercel.json`](./frontend/vercel.json).
+Frontend uses same-origin `/api/*` calls. In Vercel, [`frontend/vercel.json`](./frontend/vercel.json) rewrites:
+1. `/api/*` to your Render backend
+2. everything else to `index.html` for SPA routing
 
 ## 4) Verify deployment
 
 1. Check backend health:
    - `GET https://<your-render-service>.onrender.com/health`
-2. Bootstrap API should return JSON with empty arrays initially:
-   - `GET https://<your-render-service>.onrender.com/api/bootstrap`
-3. Add a transaction from frontend and confirm data is persisted after a backend restart/redeploy.
-4. Confirm browser requests from your Vercel domain succeed (CORS), while unknown origins are blocked if `ALLOWED_ORIGINS` is set.
+2. Add a transaction from frontend and confirm persistence after backend restart/redeploy.
+3. Confirm browser requests from your Vercel domain succeed (CORS), while unknown origins are blocked if origin allowlists are set.
 
 ## Pre-deploy checks
 
@@ -71,4 +71,3 @@ cd ../frontend && npm run build
 
 - Backend now uses MongoDB when `MONGODB_URI` is set.
 - If `MONGODB_URI` is missing, backend falls back to local file storage for development/testing.
-- If `ALLOWED_ORIGINS` is unset, backend allows all origins (convenient for local development).

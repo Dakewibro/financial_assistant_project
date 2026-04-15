@@ -1,10 +1,6 @@
 import type { Bootstrap, RuleFormState, TransactionFormState } from "../types/finance";
 
-const apiBase = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ?? "http://localhost:4000";
-
-function apiUrl(path: string): string {
-  return `${apiBase}${path}`;
-}
+const apiBase = "http://localhost:4000";
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, init);
@@ -15,11 +11,11 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export function fetchBootstrap(): Promise<Bootstrap> {
-  return request<Bootstrap>(apiUrl("/api/bootstrap"));
+  return request<Bootstrap>(`${apiBase}/api/bootstrap`);
 }
 
 export async function createTransaction(form: TransactionFormState): Promise<void> {
-  await request(apiUrl("/api/transactions"), {
+  await request(`${apiBase}/api/transactions`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -33,7 +29,7 @@ export async function createTransaction(form: TransactionFormState): Promise<voi
 }
 
 export async function createRule(form: RuleFormState): Promise<void> {
-  await request(apiUrl("/api/rules"), {
+  await request(`${apiBase}/api/rules`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -48,7 +44,7 @@ export async function createRule(form: RuleFormState): Promise<void> {
 
 export async function importScenario(name: string): Promise<void> {
   const scenario = await request(`/scenarios/${name}.json`);
-  await request(apiUrl("/api/import"), {
+  await request(`${apiBase}/api/import`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(scenario),
