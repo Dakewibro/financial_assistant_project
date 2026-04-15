@@ -1,7 +1,14 @@
+import { connectDatabase } from "./config/db.js";
+import { getEnv } from "./config/env.js";
 import { app } from "./app.js";
 
-const port = Number(process.env.PORT ?? 4000);
-app.listen(port, () => {
-  // eslint-disable-next-line no-console
-  console.log(`Backend listening on ${port}`);
-});
+async function start() {
+  await connectDatabase();
+  const { port } = getEnv();
+  app.listen(port, () => {
+    // eslint-disable-next-line no-console
+    console.log(`Backend listening on ${port}`);
+  });
+}
+
+void start();

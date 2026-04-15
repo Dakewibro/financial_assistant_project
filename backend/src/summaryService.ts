@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek.js";
-import { Summary, Transaction } from "./types.js";
+import type { Scope, Summary, Transaction } from "./types.js";
 
 dayjs.extend(isoWeek);
 
@@ -15,15 +15,19 @@ function buildTrend(transactions: Transaction[], days: number): Array<{ date: st
     const amount = transactions
       .filter((tx) => tx.date === date)
       .reduce((acc, tx) => acc + tx.amount, 0);
-    out.push({ date, amount });
+    out.push({ date, amount: Number(amount.toFixed(2)) });
   }
   return out;
+}
+
+function sumScope(transactions: Transaction[], scope: Scope): number {
+  return transactions.filter((tx) => tx.scope === scope).reduce((acc, tx) => acc + tx.amount, 0);
 }
 
 export function computeSummary(transactions: Transaction[]): Summary {
   const today = dayjs();
   const perCategoryTotals = transactions.reduce<Record<string, number>>((acc, tx) => {
-    acc[tx.category] = (acc[tx.category] ?? 0) + tx.amount;
+    acc[tx.category] = Number(((acc[tx.category] ?? 0) + tx.amount).toFixed(2));
     return acc;
   }, {});
 
@@ -43,11 +47,15 @@ export function computeSummary(transactions: Transaction[]): Summary {
   );
 
   return {
-    totalSpending: transactions.reduce((acc, tx) => acc + tx.amount, 0),
+    totalSpending: Number(transactions.reduce((acc, tx) => acc + tx.amount, 0).toFixed(2)),
     perCategoryTotals,
-    dailyTotal,
-    weeklyTotal,
-    monthlyTotal,
+    dailyTotal: Number(dailyTotal.toFixed(2)),
+    weeklyTotal: Number(weeklyTotal.toFixed(2)),
+    monthlyTotal: Number(monthlyTotal.toFixed(2)),
+    byScope: {
+      personal: Number(sumScope(transactions, "personal").toFixed(2)),
+      business: Number(sumScope(transactions, "business").toFixed(2)),
+    },
     top3Categories,
     trend7Days: buildTrend(transactions, 7),
     trend30Days: buildTrend(transactions, 30),

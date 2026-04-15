@@ -1,121 +1,195 @@
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek.js";
 import { randomUUID } from "node:crypto";
-import { Alert, BudgetRule, Transaction } from "./types.js";
+import type { Alert, BudgetRule, RecurringGroup, Transaction } from "./types.js";
 
 dayjs.extend(isoWeek);
 
-const createAlert = (ruleId: string, message: string, evidence: string, severity: Alert["severity"]): Alert => ({
-  id: randomUUID(),
-  ruleId,
-  message,
-  evidence,
-  severity,
-});
+function createAlert(
+  rule: BudgetRule,
+  message: string,
+  evidence: string,
+  severity: Alert["severity"],
+  status: Alert["status"],
+): Alert {
+  return {
+    id: randomUUID(),
+    ruleId: rule.id,
+    ruleType: rule.ruleType,
+    message,
+    evidence,
+    severity,
+    status,
+  };
+}
 
-export function evaluateAlerts(transactions: Transaction[], rules: BudgetRule[]): Alert[] {
-  const enabledRules = rules.filter((rule) => rule.enabled);
-  const today = dayjs().format("YYYY-MM-DD");
-  const thisWeek = dayjs().isoWeek();
-  const thisMonth = dayjs().month();
-  const thisYear = dayjs().year();
-  const total = transactions.reduce((acc, tx) => acc + tx.amount, 0);
+function filterByScope(transactions: Transaction[], rule: BudgetRule): Transaction[] {
+  if (!rule.scope) return transactions;
+  return transactions.filter((tx) => tx.scope === rule.scope);
+}
+
+function filterByPeriod(transactions: Transaction[], period: BudgetRule["period"]): Transaction[] {
+  const today = dayjs();
+  return transactions.filter((tx) => {
+    const date = dayjs(tx.date);
+    if (period === "daily") return tx.date === today.format("YYYY-MM-DD");
+    if (period === "weekly") return date.isoWeek() === today.isoWeek() && date.year() === today.year();
+    return date.month() === today.month() && date.year() === today.year();
+  });
+}
+
+function buildCapAlerts(rule: BudgetRule, amount: number, label: string): Alert[] {
+  if (rule.threshold <= 0) return [];
+  if (amount >= rule.threshold) {
+    return [
+      createAlert(
+        rule,
+        `${label} cap exceeded`,
+        `HK$${amount.toFixed(2)} of HK$${rule.threshold.toFixed(2)}`,
+        "critical",
+        "exceeded",
+      ),
+    ];
+  }
+
+  if (amount >= rule.threshold * 0.8) {
+    return [
+      createAlert(
+        rule,
+        `${label} cap nearly reached`,
+        `HK$${amount.toFixed(2)} of HK$${rule.threshold.toFixed(2)}`,
+        "warning",
+        "near_limit",
+      ),
+    ];
+  }
+
+  return [];
+}
+
+function getStreakLength(transactions: Transaction[], dailyThreshold: number): number {
+  if (transactions.length === 0 || dailyThreshold <= 0) return 0;
+  const dateTotals = transactions.reduce<Record<string, number>>((acc, tx) => {
+    acc[tx.date] = (acc[tx.date] ?? 0) + tx.amount;
+    return acc;
+  }, {});
+
+  const dates = Object.keys(dateTotals).sort((a, b) => b.localeCompare(a));
+  let streak = 0;
+
+  for (let index = 0; index < dates.length; index += 1) {
+    const current = dates[index];
+    const previous = dates[index + 1];
+
+    if (dateTotals[current] > dailyThreshold) {
+      streak += 1;
+    } else {
+      break;
+    }
+
+    if (previous) {
+      const gap = dayjs(current).diff(dayjs(previous), "day");
+      if (gap > 1) break;
+    }
+  }
+
+  return streak;
+}
+
+export function evaluateAlerts(transactions: Transaction[], rules: BudgetRule[], recurringGroups: RecurringGroup[]): Alert[] {
   const alerts: Alert[] = [];
 
-  for (const rule of enabledRules) {
+  for (const rule of rules.filter((item) => item.enabled)) {
+    const scopedTransactions = filterByScope(transactions, rule);
+    const periodTransactions = filterByPeriod(scopedTransactions, rule.period);
+
     if (rule.ruleType === "category_cap" && rule.category) {
-      const categoryAmount = transactions
-        .filter((tx) => tx.category === rule.category && tx.date === today)
-        .reduce((acc, tx) => acc + tx.amount, 0);
-      if (categoryAmount > rule.threshold) {
-        alerts.push(
-          createAlert(
-            rule.id,
-            `${rule.category} daily cap exceeded`,
-            `${categoryAmount.toFixed(2)} > ${rule.threshold.toFixed(2)} today`,
-            "critical",
-          ),
-        );
-      }
+      const categoryAmount = periodTransactions
+        .filter((tx) => tx.category === rule.category)
+        .reduce((sum, tx) => sum + tx.amount, 0);
+      alerts.push(...buildCapAlerts(rule, categoryAmount, `${rule.category} ${rule.period}`));
     }
 
     if (rule.ruleType === "period_cap") {
-      const periodAmount = transactions
-        .filter((tx) => {
-          const date = dayjs(tx.date);
-          if (rule.period === "daily") return tx.date === today;
-          if (rule.period === "weekly") return date.isoWeek() === thisWeek && date.year() === thisYear;
-          return date.month() === thisMonth && date.year() === thisYear;
-        })
-        .reduce((acc, tx) => acc + tx.amount, 0);
-      if (periodAmount > rule.threshold) {
-        alerts.push(
-          createAlert(
-            rule.id,
-            `${rule.period} spending cap exceeded`,
-            `${periodAmount.toFixed(2)} > ${rule.threshold.toFixed(2)}`,
-            "warning",
-          ),
-        );
-      }
+      const periodAmount = periodTransactions.reduce((sum, tx) => sum + tx.amount, 0);
+      alerts.push(...buildCapAlerts(rule, periodAmount, `${rule.period} spending`));
     }
 
-    if (rule.ruleType === "category_percentage" && rule.category && total > 0) {
-      const categoryTotal = transactions
-        .filter((tx) => tx.category === rule.category)
-        .reduce((acc, tx) => acc + tx.amount, 0);
-      const ratio = (categoryTotal / total) * 100;
-      if (ratio > rule.threshold) {
-        alerts.push(
-          createAlert(
-            rule.id,
-            `${rule.category} share is too high`,
-            `${ratio.toFixed(1)}% > ${rule.threshold}% of total spending`,
-            "warning",
-          ),
-        );
+    if (rule.ruleType === "category_percentage" && rule.category) {
+      const periodAmount = periodTransactions.reduce((sum, tx) => sum + tx.amount, 0);
+      if (periodAmount > 0) {
+        const categoryAmount = periodTransactions
+          .filter((tx) => tx.category === rule.category)
+          .reduce((sum, tx) => sum + tx.amount, 0);
+        const ratio = (categoryAmount / periodAmount) * 100;
+        if (ratio >= rule.threshold) {
+          alerts.push(
+            createAlert(
+              rule,
+              `${rule.category} share is too high`,
+              `${ratio.toFixed(1)}% of ${rule.period} spending`,
+              "warning",
+              "detected",
+            ),
+          );
+        } else if (ratio >= rule.threshold * 0.8) {
+          alerts.push(
+            createAlert(
+              rule,
+              `${rule.category} share is nearing threshold`,
+              `${ratio.toFixed(1)}% of ${rule.period} spending`,
+              "info",
+              "near_limit",
+            ),
+          );
+        }
       }
     }
 
     if (rule.ruleType === "uncategorized_warning") {
-      const uncategorizedCount = transactions.filter((tx) => tx.category === "Uncategorized").length;
+      const uncategorizedCount = periodTransactions.filter((tx) => tx.category === "Uncategorized").length;
       if (uncategorizedCount > rule.threshold) {
         alerts.push(
           createAlert(
-            rule.id,
+            rule,
             "Too many uncategorized entries",
-            `${uncategorizedCount} uncategorized transactions`,
+            `${uncategorizedCount} uncategorized transactions this ${rule.period}`,
             "info",
+            "detected",
           ),
         );
       }
     }
 
     if (rule.ruleType === "consecutive_overspend") {
-      let streak = 0;
-      for (let i = 0; i < 30; i += 1) {
-        const date = dayjs().subtract(i, "day").format("YYYY-MM-DD");
-        const dayTotal = transactions
-          .filter((tx) => tx.date === date)
-          .reduce((acc, tx) => acc + tx.amount, 0);
-        if (dayTotal > rule.threshold) {
-          streak += 1;
-        } else {
-          break;
-        }
-      }
+      const streak = getStreakLength(periodTransactions, rule.threshold);
       if (streak >= 3) {
         alerts.push(
           createAlert(
-            rule.id,
+            rule,
             "Consecutive overspend streak detected",
-            `${streak} days above ${rule.threshold.toFixed(2)}`,
+            `${streak} days above HK$${rule.threshold.toFixed(2)}`,
             "critical",
+            "detected",
           ),
         );
       }
     }
+
+    if (rule.ruleType === "recurring_threshold") {
+      const recurringTotal = recurringGroups
+        .filter((item) => item.kind === "subscription")
+        .reduce((sum, item) => sum + item.totalLast30Days, 0);
+
+      alerts.push(...buildCapAlerts(rule, recurringTotal, "Recurring spend"));
+    }
   }
 
-  return alerts;
+  const severityRank: Record<Alert["severity"], number> = {
+    critical: 3,
+    warning: 2,
+    info: 1,
+  };
+
+  return alerts.sort((a, b) => severityRank[b.severity] - severityRank[a.severity]);
 }

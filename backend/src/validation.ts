@@ -3,10 +3,11 @@ import { z } from "zod";
 export const transactionSchema = z.object({
   id: z.string().optional(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  amount: z.number().nonnegative(),
+  amount: z.number().positive(),
   category: z.string().min(1),
   description: z.string().min(1),
   notes: z.string().optional(),
+  scope: z.enum(["personal", "business"]).default("personal"),
 });
 
 export const budgetRuleSchema = z.object({
@@ -20,8 +21,10 @@ export const budgetRuleSchema = z.object({
     "category_percentage",
     "consecutive_overspend",
     "uncategorized_warning",
+    "recurring_threshold",
   ]),
   enabled: z.boolean().default(true),
+  scope: z.enum(["personal", "business"]).optional(),
 });
 
 export const categorySchema = z.object({

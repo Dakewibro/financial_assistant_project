@@ -1,13 +1,15 @@
 {
-  "categories": ["Meals", "Transport", "Subscription", "Shopping", "Uncategorized"],
-  "rules": [
-    { "id": "s1", "ruleType": "category_percentage", "category": "Subscription", "period": "monthly", "threshold": 25, "enabled": true },
-    { "id": "s2", "ruleType": "period_cap", "period": "monthly", "threshold": 500, "enabled": true }
-  ],
+  "categories": ["Food", "Transport", "Shopping", "Bills", "Subscription", "Business Expense", "Uncategorized"],
   "transactions": [
-    { "id": "s01", "date": "2026-03-01", "amount": 88, "category": "Subscription", "description": "Streaming A", "createdAt": "2026-03-01T09:00:00.000Z" },
-    { "id": "s02", "date": "2026-03-02", "amount": 120, "category": "Subscription", "description": "Cloud storage", "createdAt": "2026-03-02T09:00:00.000Z" },
-    { "id": "s03", "date": "2026-03-04", "amount": 45, "category": "Subscription", "description": "Music plan", "createdAt": "2026-03-04T09:00:00.000Z" },
-    { "id": "s04", "date": "2026-03-09", "amount": 90, "category": "Meals", "description": "Team dinner", "createdAt": "2026-03-09T19:00:00.000Z" }
+    { "date": "2026-02-16", "amount": 88, "category": "Subscription", "description": "Streaming A", "scope": "personal" },
+    { "date": "2026-03-16", "amount": 88, "category": "Subscription", "description": "Streaming A", "scope": "personal" },
+    { "date": "2026-04-16", "amount": 88, "category": "Subscription", "description": "Streaming A", "scope": "personal" },
+    { "date": "2026-04-02", "amount": 120, "category": "Subscription", "description": "Cloud storage", "scope": "business" },
+    { "date": "2026-04-04", "amount": 45, "category": "Subscription", "description": "Music plan", "scope": "personal" },
+    { "date": "2026-04-09", "amount": 90, "category": "Food", "description": "Team dinner", "scope": "business" }
+  ],
+  "rules": [
+    { "ruleType": "category_percentage", "category": "Subscription", "period": "monthly", "threshold": 25, "enabled": true },
+    { "ruleType": "recurring_threshold", "period": "monthly", "threshold": 80, "enabled": true }
   ]
 }

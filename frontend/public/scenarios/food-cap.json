@@ -1,11 +1,11 @@
 {
-  "categories": ["Meals", "Transport", "Subscription", "Shopping", "Uncategorized"],
-  "rules": [
-    { "id": "food1", "ruleType": "category_cap", "category": "Meals", "period": "daily", "threshold": 50, "enabled": true }
-  ],
+  "categories": ["Food", "Transport", "Shopping", "Bills", "Subscription", "Business Expense", "Uncategorized"],
   "transactions": [
-    { "id": "f1", "date": "2026-03-29", "amount": 35, "category": "Meals", "description": "Breakfast + lunch", "createdAt": "2026-03-29T10:00:00.000Z" },
-    { "id": "f2", "date": "2026-03-29", "amount": 30, "category": "Meals", "description": "Dinner", "createdAt": "2026-03-29T19:00:00.000Z" },
-    { "id": "f3", "date": "2026-03-29", "amount": 15, "category": "Transport", "description": "Bus", "createdAt": "2026-03-29T20:00:00.000Z" }
+    { "date": "2026-04-16", "amount": 35, "category": "Food", "description": "Breakfast + lunch", "scope": "personal" },
+    { "date": "2026-04-16", "amount": 30, "category": "Food", "description": "Dinner", "scope": "personal" },
+    { "date": "2026-04-16", "amount": 15, "category": "Transport", "description": "Bus", "scope": "personal" }
+  ],
+  "rules": [
+    { "ruleType": "category_cap", "category": "Food", "period": "daily", "threshold": 50, "enabled": true }
   ]
 }
