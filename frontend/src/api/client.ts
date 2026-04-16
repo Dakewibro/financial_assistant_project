@@ -1,6 +1,6 @@
 import type { Bootstrap, RuleFormState, TransactionFiltersState, TransactionFormState } from "../types/finance";
 
-const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
+const apiBase = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? "http://localhost:4000" : "");
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, init);
