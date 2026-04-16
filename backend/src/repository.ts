@@ -4,6 +4,7 @@ import { BudgetRuleModel } from "./models/BudgetRule.js";
 import { CategoryModel } from "./models/Category.js";
 import { TransactionModel } from "./models/Transaction.js";
 import { DEFAULT_CATEGORIES, type BudgetRule, type Scope, type Transaction, type TransactionFilters } from "./types.js";
+import { escapeRegex } from "./utils/escapeRegex.js";
 
 interface MemoryStore {
   transactions: Transaction[];
@@ -137,7 +138,7 @@ export async function addCategory(name: string): Promise<string[]> {
     return listCategories();
   }
 
-  const existing = await CategoryModel.findOne({ name: new RegExp(`^${trimmed}$`, "i") });
+  const existing = await CategoryModel.findOne({ name: new RegExp(`^${escapeRegex(trimmed)}$`, "i") });
   if (!existing) {
     await CategoryModel.create({ name: trimmed, isDefault: false });
   }
@@ -160,10 +161,11 @@ export async function listTransactions(filters: Omit<TransactionFilters, "recurr
     if (filters.toDate) Object.assign(query.date as Record<string, string>, { $lte: filters.toDate });
   }
   if (filters.search) {
+    const safePattern = escapeRegex(filters.search);
     query.$or = [
-      { description: { $regex: filters.search, $options: "i" } },
-      { normalizedMerchant: { $regex: filters.search, $options: "i" } },
-      { category: { $regex: filters.search, $options: "i" } },
+      { description: { $regex: safePattern, $options: "i" } },
+      { normalizedMerchant: { $regex: safePattern, $options: "i" } },
+      { category: { $regex: safePattern, $options: "i" } },
     ];
   }
 

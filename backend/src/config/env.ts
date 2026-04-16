@@ -15,6 +15,12 @@ function parseOrigins(value: string | undefined): string[] {
 export function getEnv() {
   const mongodbUri = process.env.MONGODB_URI?.trim() ?? "";
   const requestedStorageMode = process.env.STORAGE_MODE === "memory" ? "memory" : "mongo";
+  const adminApiToken = process.env.ADMIN_API_TOKEN?.trim() ?? "";
+
+  if (requestedStorageMode === "mongo" && process.env.STORAGE_MODE === "mongo" && mongodbUri.length === 0) {
+    throw new Error("MONGODB_URI is required when STORAGE_MODE=mongo");
+  }
+
   const storageMode: StorageMode = mongodbUri.length > 0 ? requestedStorageMode : "memory";
 
   return {
@@ -22,6 +28,7 @@ export function getEnv() {
     mongodbUri,
     mongodbDb: process.env.MONGODB_DB?.trim() || "financial_assistant",
     allowedOrigins: parseOrigins(process.env.ALLOWED_ORIGINS),
+    adminApiToken,
     storageMode,
   };
 }

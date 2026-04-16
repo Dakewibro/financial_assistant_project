@@ -1,6 +1,7 @@
 import cors from "cors";
 import express from "express";
 import { evaluateAlerts } from "./alertService.js";
+import { isDatabaseReady } from "./config/db.js";
 import { getEnv } from "./config/env.js";
 import {
   addCategory,
@@ -19,6 +20,18 @@ import { computeSummary } from "./summaryService.js";
 import { DEFAULT_CATEGORIES, type BootstrapResponse, type BudgetRule, type Scope, type Transaction, type TransactionFilters } from "./types.js";
 import { normalizeMerchant } from "./utils/normalizeMerchant.js";
 import { budgetRuleSchema, categorySchema, transactionSchema } from "./validation.js";
+
+interface ImportPayload {
+  transactions: Array<Omit<Transaction, "id" | "createdAt" | "updatedAt">>;
+  rules: Array<Omit<BudgetRule, "id">>;
+  categories: string[];
+}
+
+interface ProtectedMutationAccessResult {
+  allowed: boolean;
+  error?: string;
+  status?: number;
+}
 
 function originAllowed(origin: string | undefined): boolean {
   if (!origin) return true;
@@ -45,6 +58,101 @@ function parseTransactionFilters(query: Record<string, unknown>): TransactionFil
     recurringOnly: query.recurringOnly === "true",
     search: typeof query.search === "string" && query.search.length > 0 ? query.search : undefined,
   };
+}
+
+export function validateProtectedMutationAccess(providedToken: string | undefined): ProtectedMutationAccessResult {
+  const { adminApiToken, storageMode } = getEnv();
+  if (storageMode === "memory") return { allowed: true };
+
+  if (!adminApiToken) {
+    return {
+      allowed: false,
+      error: "ADMIN_API_TOKEN must be configured for protected mutation endpoints",
+      status: 503,
+    };
+  }
+
+  if (providedToken?.trim() !== adminApiToken) {
+    return {
+      allowed: false,
+      error: "Protected mutation endpoint requires a valid x-admin-token header",
+      status: 403,
+    };
+  }
+
+  return { allowed: true };
+}
+
+function requireProtectedMutationAccess(req: express.Request, res: express.Response): boolean {
+  const access = validateProtectedMutationAccess(req.get("x-admin-token"));
+  if (access.allowed) return true;
+  res.status(access.status ?? 403).json({ error: access.error });
+  return false;
+}
+
+export function parseImportPayload(body: unknown): { payload?: ImportPayload; error?: string } {
+  if (!body || typeof body !== "object") {
+    return { error: "Malformed import payload" };
+  }
+
+  const candidate = body as { transactions?: unknown; rules?: unknown; categories?: unknown };
+  const transactions = Array.isArray(candidate.transactions) ? candidate.transactions : [];
+  const rules = Array.isArray(candidate.rules) ? candidate.rules : [];
+  const categories = Array.isArray(candidate.categories) ? candidate.categories : [];
+
+  const cleanTransactions: Array<Omit<Transaction, "id" | "createdAt" | "updatedAt">> = [];
+  for (const [index, tx] of transactions.entries()) {
+    const result = transactionSchema.safeParse(tx);
+    if (!result.success) {
+      return { error: `Invalid transaction at index ${index}` };
+    }
+    cleanTransactions.push({
+      ...result.data,
+      normalizedMerchant: normalizeMerchant(result.data.description),
+    });
+  }
+
+  const cleanRules: Array<Omit<BudgetRule, "id">> = [];
+  for (const [index, rule] of rules.entries()) {
+    const result = budgetRuleSchema.safeParse(rule);
+    if (!result.success) {
+      return { error: `Invalid budget rule at index ${index}` };
+    }
+    cleanRules.push(result.data);
+  }
+
+  const cleanCategories: string[] = [];
+  for (const [index, entry] of categories.entries()) {
+    if (typeof entry !== "string" || entry.trim().length === 0) {
+      return { error: `Invalid category at index ${index}` };
+    }
+    cleanCategories.push(entry.trim());
+  }
+
+  return {
+    payload: {
+      transactions: cleanTransactions,
+      rules: cleanRules,
+      categories: cleanCategories,
+    },
+  };
+}
+
+export async function importPayload(body: unknown): Promise<{ importedTransactions: number; importedRules: number }> {
+  const parsed = parseImportPayload(body);
+  if (!parsed.payload) {
+    throw new Error(parsed.error ?? "Malformed import payload");
+  }
+
+  const { categories, rules, transactions } = parsed.payload;
+  const derivedCategories = transactions.map((tx) => tx.category);
+  await replaceStore({
+    transactions,
+    rules,
+    categories: [...new Set([...DEFAULT_CATEGORIES, ...categories, ...derivedCategories])],
+  });
+
+  return { importedTransactions: transactions.length, importedRules: rules.length };
 }
 
 export async function buildBootstrapPayload(): Promise<BootstrapResponse> {
@@ -79,7 +187,9 @@ app.use(
 app.use(express.json({ limit: "1mb" }));
 
 app.get("/health", (_req, res) => {
-  res.json({ ok: true, storageMode: getEnv().storageMode });
+  const { storageMode } = getEnv();
+  const ready = isDatabaseReady();
+  res.status(ready ? 200 : 503).json({ ok: ready, storageMode });
 });
 
 app.get("/api/bootstrap", async (_req, res) => {
@@ -159,41 +269,19 @@ app.get("/api/export", async (_req, res) => {
 });
 
 app.post("/api/import", async (req, res) => {
-  if (!req.body || typeof req.body !== "object") {
-    return res.status(400).json({ error: "Malformed import payload" });
+  if (!requireProtectedMutationAccess(req, res)) return;
+
+  try {
+    const result = await importPayload(req.body);
+    return res.json(result);
+  } catch (error) {
+    return res.status(400).json({ error: error instanceof Error ? error.message : "Malformed import payload" });
   }
-
-  const transactions = Array.isArray(req.body.transactions) ? req.body.transactions : [];
-  const rules = Array.isArray(req.body.rules) ? req.body.rules : [];
-  const categories = Array.isArray(req.body.categories) ? req.body.categories : [];
-
-  const cleanTransactions: Array<Omit<Transaction, "id" | "createdAt" | "updatedAt">> = transactions.flatMap((tx: unknown) => {
-    const result = transactionSchema.safeParse(tx);
-    if (!result.success) return [];
-    return [
-      {
-        ...result.data,
-        normalizedMerchant: normalizeMerchant(result.data.description),
-      },
-    ];
-  });
-
-  const cleanRules: Array<Omit<BudgetRule, "id">> = rules.flatMap((rule: unknown) => {
-    const result = budgetRuleSchema.safeParse(rule);
-    return result.success ? [result.data] : [];
-  });
-
-  const categoryNames = categories.filter((entry: unknown): entry is string => typeof entry === "string" && entry.length > 0);
-  const derivedCategories = cleanTransactions.map((tx) => tx.category);
-  await replaceStore({
-    transactions: cleanTransactions,
-    rules: cleanRules,
-    categories: [...new Set([...DEFAULT_CATEGORIES, ...categoryNames, ...derivedCategories])],
-  });
-  return res.json({ importedTransactions: cleanTransactions.length, importedRules: cleanRules.length });
 });
 
 app.post("/api/generate-test-data", async (req, res) => {
+  if (!requireProtectedMutationAccess(req, res)) return;
+
   const count = typeof req.body?.count === "number" ? req.body.count : 30;
   const categories = await listCategories();
   const generated: Array<Omit<Transaction, "id" | "createdAt" | "updatedAt">> = Array.from({ length: count }).map((_, index) => {
