@@ -2,17 +2,20 @@ services:
   - type: web
     name: financial-assistant-backend
     env: node
-    plan: free
     rootDir: backend
-    buildCommand: npm ci && npm run build
+    plan: free
+    autoDeploy: true
+    buildCommand: npm ci --include=dev && npm run build
     startCommand: npm run start
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
         value: 20
-      - key: MONGODB_URI
-        sync: false
+      - key: STORAGE_MODE
+        value: mongo
       - key: MONGODB_DB
         value: financial_assistant
+      - key: MONGODB_URI
+        sync: false
       - key: ALLOWED_ORIGINS
         sync: false
