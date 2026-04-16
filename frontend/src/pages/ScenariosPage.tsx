@@ -13,9 +13,9 @@ export function ScenariosPage({ runScenario }: { runScenario: (name: string) => 
             void runScenario(scenario);
           }}
         >
-          <SectionCard className="hover:bg-slate-800">
+          <SectionCard className="h-full transition hover:border-emerald-400/40 hover:bg-slate-800">
             <div className="font-medium">{scenario}</div>
-            <div className="text-sm text-slate-300">Load sample data and rules</div>
+            <div className="mt-2 text-sm text-slate-300">Load a sample dataset to exercise alerts, recurring detection, and dashboards.</div>
           </SectionCard>
         </button>
       ))}
