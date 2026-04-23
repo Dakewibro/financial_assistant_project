@@ -29,6 +29,10 @@ export function getEnv() {
     mongodbDb: process.env.MONGODB_DB?.trim() || "financial_assistant",
     allowedOrigins: parseOrigins(process.env.ALLOWED_ORIGINS),
     adminApiToken,
+    jwtSecret: process.env.JWT_SECRET?.trim() || "dev-local-jwt-secret",
     storageMode,
+    emergentV2Enabled: process.env.EMERGENT_V2_ENABLED === "true",
+    authEnforced: process.env.AUTH_ENFORCED === "true",
+    v2ContractsEnabled: process.env.V2_CONTRACTS_ENABLED === "true",
   };
 }

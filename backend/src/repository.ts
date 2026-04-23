@@ -203,6 +203,18 @@ export async function createTransaction(
   return mapTransactionDocument(doc);
 }
 
+export async function deleteTransaction(id: string): Promise<boolean> {
+  const env = getEnv();
+  if (env.storageMode === "memory") {
+    const before = memoryStore.transactions.length;
+    memoryStore.transactions = memoryStore.transactions.filter((tx) => tx.id !== id);
+    return memoryStore.transactions.length < before;
+  }
+
+  const result = await TransactionModel.deleteOne({ id });
+  return result.deletedCount > 0;
+}
+
 export async function replaceTransactions(
   transactions: Array<Omit<Transaction, "id" | "createdAt" | "updatedAt"> & { createdAt?: string; updatedAt?: string }>,
 ): Promise<Transaction[]> {

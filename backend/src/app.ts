@@ -1,5 +1,11 @@
 import cors from "cors";
 import express from "express";
+import { randomUUID } from "node:crypto";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import { slowDown } from "express-slow-down";
 import { evaluateAlerts } from "./alertService.js";
 import { isDatabaseReady } from "./config/db.js";
 import { getEnv } from "./config/env.js";
@@ -7,6 +13,7 @@ import {
   addCategory,
   createRule,
   createTransaction,
+  deleteTransaction,
   listCategories,
   listRules,
   listTransactions,
@@ -14,6 +21,7 @@ import {
   seedDefaultCategories,
 } from "./repository.js";
 import { buildRecentEntryHelpers } from "./services/categorySuggestionService.js";
+import { suggestCategory as suggestCategoryFromHistory } from "./services/categorySuggestionService.js";
 import { generateInsights } from "./services/insightService.js";
 import { detectRecurringGroups } from "./services/recurringService.js";
 import { computeSummary } from "./summaryService.js";
@@ -33,11 +41,61 @@ interface ProtectedMutationAccessResult {
   status?: number;
 }
 
+type AuthUser = {
+  id: string;
+  name: string;
+  email: string;
+  passwordHash: string;
+  onboarded: boolean;
+  monthlyIncome: number;
+  primaryUse: "personal" | "freelancer" | "mixed";
+};
+
+type BudgetResource = {
+  id: string;
+  ownerId: string;
+  name: string;
+  category: string;
+  account: Scope;
+  limit: number;
+  memberIds: string[];
+  shareToken?: string;
+};
+
+type GoalResource = {
+  id: string;
+  ownerId: string;
+  name: string;
+  kind: string;
+  targetAmount: number;
+  currentAmount: number;
+  monthlyContribution: number;
+  memberIds: string[];
+  shareToken?: string;
+};
+
+const users: AuthUser[] = [
+  {
+    id: "demo-user",
+    name: "Demo User",
+    email: "demo@finassist.app",
+    passwordHash: bcrypt.hashSync("demo1234", 10),
+    onboarded: true,
+    monthlyIncome: 24000,
+    primaryUse: "mixed",
+  },
+];
+const acknowledgedAlertIds = new Set<string>();
+const budgets: BudgetResource[] = [];
+const goals: GoalResource[] = [];
+const shareIndex = new Map<string, { kind: "budget" | "goal"; resourceId: string; ownerId: string }>();
+const dashboardPrefs = new Map<string, { widgets: Array<{ id: string; size: "s" | "m" | "l" }> }>();
+
 function originAllowed(origin: string | undefined): boolean {
   if (!origin) return true;
   const { allowedOrigins } = getEnv();
   return allowedOrigins.some((allowed) => {
-    if (allowed.includes("*")) {
+    if (allowed.includes("*") && process.env.NODE_ENV !== "production") {
       const pattern = new RegExp(`^${allowed.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*")}$`);
       return pattern.test(origin);
     }
@@ -58,6 +116,53 @@ function parseTransactionFilters(query: Record<string, unknown>): TransactionFil
     recurringOnly: query.recurringOnly === "true",
     search: typeof query.search === "string" && query.search.length > 0 ? query.search : undefined,
   };
+}
+
+function getJwtSecret() {
+  return getEnv().jwtSecret;
+}
+
+function getBearerToken(header: string | undefined) {
+  if (!header) return null;
+  const [prefix, token] = header.split(" ");
+  if (prefix !== "Bearer" || !token) return null;
+  return token;
+}
+
+function createAuthToken(user: AuthUser) {
+  return jwt.sign({ sub: user.id, email: user.email }, getJwtSecret(), { expiresIn: "7d" });
+}
+
+function getAuthUser(req: express.Request) {
+  const token = getBearerToken(req.header("authorization"));
+  if (!token) return null;
+  try {
+    const payload = jwt.verify(token, getJwtSecret()) as { sub?: string };
+    if (!payload.sub) return null;
+    return users.find((entry) => entry.id === payload.sub) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function maybeRequireAuth(req: express.Request, res: express.Response) {
+  const { authEnforced } = getEnv();
+  if (!authEnforced) return { user: null, required: false } as const;
+  const user = getAuthUser(req);
+  if (!user) {
+    res.status(401).json({ detail: "Unauthorized" });
+    return { user: null, required: true } as const;
+  }
+  return { user, required: true } as const;
+}
+
+function requireAuth(req: express.Request, res: express.Response) {
+  const user = getAuthUser(req);
+  if (!user) {
+    res.status(401).json({ detail: "Unauthorized" });
+    return null;
+  }
+  return user;
 }
 
 export function validateProtectedMutationAccess(providedToken: string | undefined): ProtectedMutationAccessResult {
@@ -176,7 +281,65 @@ export async function buildBootstrapPayload(): Promise<BootstrapResponse> {
   };
 }
 
+function buildInsightsPayload(transactions: Transaction[], rules: BudgetRule[]) {
+  const recurring = detectRecurringGroups(transactions);
+  const alerts = evaluateAlerts(transactions, rules, recurring);
+  const summary = computeSummary(transactions);
+  const now = new Date();
+  const monthDays = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const daysElapsed = now.getDate();
+  const monthPct = (daysElapsed / monthDays) * 100;
+  const monthlyLimits = rules.filter((rule) => rule.period === "monthly").reduce((sum, rule) => sum + rule.threshold, 0);
+  const remainingBudget = Math.max(0, monthlyLimits - summary.monthlyTotal);
+  const daysRemaining = Math.max(1, monthDays - daysElapsed);
+  const safeToSpendDaily = remainingBudget / daysRemaining;
+  const byCategory = Object.entries(summary.perCategoryTotals)
+    .map(([category, amount]) => ({ category, amount }))
+    .sort((a, b) => b.amount - a.amount);
+  const byAccount = (Object.entries(summary.byScope) as Array<[Scope, number]>).map(([account, amount]) => ({ account, amount }));
+
+  const pacingBudgets = rules
+    .filter((rule) => rule.ruleType === "category_cap" && rule.category)
+    .map((rule) => {
+      const spent = transactions.filter((tx) => tx.category === rule.category).reduce((sum, tx) => sum + tx.amount, 0);
+      const usedPct = rule.threshold > 0 ? (spent / rule.threshold) * 100 : 0;
+      const delta = usedPct - monthPct;
+      const status = delta > 25 ? "over" : delta > 10 ? "fast" : delta > 4 ? "slightly_fast" : delta < -8 ? "under" : "on_track";
+      return {
+        budget_id: rule.id,
+        name: rule.category,
+        status,
+        used_pct: Number(usedPct.toFixed(2)),
+        over_amount: status === "over" ? Number((spent - rule.threshold).toFixed(2)) : 0,
+      };
+    });
+
+  return {
+    alerts,
+    recurring,
+    summary,
+    monthPct,
+    daysRemaining,
+    remainingBudget,
+    safeToSpendDaily,
+    byCategory,
+    byAccount,
+    pacingBudgets,
+  };
+}
+
 export const app = express();
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+  }),
+);
+app.use((req, res, next) => {
+  const requestId = req.get("x-request-id")?.trim() || randomUUID();
+  res.setHeader("x-request-id", requestId);
+  res.locals.requestId = requestId;
+  next();
+});
 app.use(
   cors({
     origin(origin, callback) {
@@ -186,18 +349,126 @@ app.use(
 );
 app.use(express.json({ limit: "1mb" }));
 
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 40,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+const shareLimiter = slowDown({
+  windowMs: 5 * 60 * 1000,
+  delayAfter: 10,
+  delayMs: () => 250,
+});
+app.use("/api/auth/login", authLimiter);
+app.use("/api/auth/register", authLimiter);
+app.use("/api/shares", shareLimiter);
+
 app.get("/health", (_req, res) => {
-  const { storageMode } = getEnv();
+  const { storageMode, emergentV2Enabled, authEnforced, v2ContractsEnabled } = getEnv();
   const ready = isDatabaseReady();
-  res.status(ready ? 200 : 503).json({ ok: ready, storageMode });
+  res.status(ready ? 200 : 503).json({
+    ok: ready,
+    storageMode,
+    flags: { emergentV2Enabled, authEnforced, v2ContractsEnabled },
+    requestId: res.locals.requestId,
+  });
 });
 
 app.get("/api/bootstrap", async (_req, res) => {
+  const auth = maybeRequireAuth(_req, res);
+  if (auth.required && !auth.user) return;
   const payload = await buildBootstrapPayload();
   res.json(payload);
 });
 
+app.post("/api/auth/register", async (req, res) => {
+  const name = typeof req.body?.name === "string" ? req.body.name.trim() : "";
+  const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
+  const password = typeof req.body?.password === "string" ? req.body.password : "";
+
+  if (!name || !email || password.length < 8) {
+    return res.status(400).json({ detail: "name, email, and password (>=8 chars) are required" });
+  }
+  if (users.some((entry) => entry.email === email)) {
+    return res.status(409).json({ detail: "Email already registered" });
+  }
+
+  const created: AuthUser = {
+    id: randomUUID(),
+    name,
+    email,
+    passwordHash: await bcrypt.hash(password, 10),
+    onboarded: false,
+    monthlyIncome: 0,
+    primaryUse: "mixed",
+  };
+  users.push(created);
+  const token = createAuthToken(created);
+  return res.status(201).json({
+    token,
+    user: {
+      id: created.id,
+      name: created.name,
+      email: created.email,
+      onboarded: created.onboarded,
+      monthly_income: created.monthlyIncome,
+      primary_use: created.primaryUse,
+    },
+  });
+});
+
+app.post("/api/auth/login", async (req, res) => {
+  const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
+  const password = typeof req.body?.password === "string" ? req.body.password : "";
+  const user = users.find((entry) => entry.email === email);
+  if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+    return res.status(401).json({ detail: "Invalid credentials" });
+  }
+  const token = createAuthToken(user);
+  return res.json({
+    token,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      onboarded: user.onboarded,
+      monthly_income: user.monthlyIncome,
+      primary_use: user.primaryUse,
+    },
+  });
+});
+
+app.get("/api/auth/me", (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  return res.json({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    onboarded: user.onboarded,
+    monthly_income: user.monthlyIncome,
+    primary_use: user.primaryUse,
+  });
+});
+
+app.post("/api/onboarding/complete", (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  const monthlyIncome = typeof req.body?.monthly_income === "number" ? req.body.monthly_income : user.monthlyIncome;
+  const primaryUse =
+    req.body?.primary_use === "personal" || req.body?.primary_use === "freelancer" || req.body?.primary_use === "mixed"
+      ? req.body.primary_use
+      : user.primaryUse;
+  user.onboarded = true;
+  user.monthlyIncome = Number.isFinite(monthlyIncome) ? Math.max(0, monthlyIncome) : user.monthlyIncome;
+  user.primaryUse = primaryUse;
+  return res.json({ ok: true, onboarded: true, monthly_income: user.monthlyIncome, primary_use: user.primaryUse });
+});
+
 app.post("/api/transactions", async (req, res) => {
+  const auth = maybeRequireAuth(req, res);
+  if (auth.required && !auth.user) return;
   const parsed = transactionSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const tx = await createTransaction({
@@ -208,6 +479,8 @@ app.post("/api/transactions", async (req, res) => {
 });
 
 app.get("/api/transactions", async (req, res) => {
+  const auth = maybeRequireAuth(req, res);
+  if (auth.required && !auth.user) return;
   const filters = parseTransactionFilters(req.query as Record<string, unknown>);
   const transactions = await listTransactions(filters);
 
@@ -217,10 +490,86 @@ app.get("/api/transactions", async (req, res) => {
     return res.json(transactions.filter((tx) => recurringKeys.has(`${tx.scope}:${tx.normalizedMerchant}`)));
   }
 
+  const limit = Number(req.query.limit);
+  if (Number.isFinite(limit) && limit > 0) {
+    return res.json(transactions.slice(0, limit));
+  }
   return res.json(transactions);
 });
 
+app.delete("/api/transactions/:id", async (req, res) => {
+  const auth = maybeRequireAuth(req, res);
+  if (auth.required && !auth.user) return;
+  const deleted = await deleteTransaction(req.params.id);
+  if (!deleted) return res.status(404).json({ detail: "Transaction not found" });
+  return res.json({ ok: true });
+});
+
+app.get("/api/transactions/recents", async (req, res) => {
+  const auth = maybeRequireAuth(req, res);
+  if (auth.required && !auth.user) return;
+  const tx = await listTransactions();
+  const recents = buildRecentEntryHelpers(tx).recentDescriptions.map((merchant) => {
+    const match = tx.find((item) => item.description === merchant);
+    return {
+      merchant,
+      typical_amount: match?.amount ?? 0,
+      category: match?.category ?? "Uncategorized",
+      account: match?.scope ?? "personal",
+    };
+  });
+  return res.json(recents.slice(0, 6));
+});
+
+app.get("/api/transactions/usual", async (req, res) => {
+  const auth = maybeRequireAuth(req, res);
+  if (auth.required && !auth.user) return;
+  const merchant = typeof req.query.merchant === "string" ? req.query.merchant.trim() : "";
+  if (!merchant) return res.json({ typical: 0, count: 0 });
+  const tx = await listTransactions();
+  const matches = tx.filter((item) => item.description.toLowerCase() === merchant.toLowerCase());
+  if (matches.length === 0) return res.json({ typical: 0, count: 0 });
+  const typical = matches.reduce((sum, item) => sum + item.amount, 0) / matches.length;
+  return res.json({
+    typical: Number(typical.toFixed(2)),
+    count: matches.length,
+    category: matches[0]?.category,
+  });
+});
+
+app.post("/api/parse-transaction", async (req, res) => {
+  const auth = maybeRequireAuth(req, res);
+  if (auth.required && !auth.user) return;
+  const text = typeof req.body?.text === "string" ? req.body.text.trim() : "";
+  if (!text) return res.status(400).json({ detail: "text is required" });
+
+  const amountMatch = text.match(/(\d+(?:\.\d{1,2})?)/);
+  const amount = amountMatch ? Number(amountMatch[1]) : undefined;
+  const merchant = text.replace(/(\d+(?:\.\d{1,2})?)/, "").trim() || text;
+  const tx = await listTransactions();
+  const suggested = suggestCategoryFromHistory(merchant, tx);
+  return res.json({
+    merchant,
+    amount,
+    category: suggested.category,
+    note: "",
+    suggestions: [suggested.category],
+  });
+});
+
+app.post("/api/suggest-category", async (req, res) => {
+  const auth = maybeRequireAuth(req, res);
+  if (auth.required && !auth.user) return;
+  const merchant = typeof req.body?.merchant === "string" ? req.body.merchant : "";
+  const note = typeof req.body?.note === "string" ? req.body.note : "";
+  const tx = await listTransactions();
+  const suggested = suggestCategoryFromHistory(`${merchant} ${note}`.trim(), tx);
+  return res.json({ suggestions: [suggested.category] });
+});
+
 app.post("/api/rules", async (req, res) => {
+  const auth = maybeRequireAuth(req, res);
+  if (auth.required && !auth.user) return;
   const parsed = budgetRuleSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const rule = await createRule(parsed.data);
@@ -228,42 +577,398 @@ app.post("/api/rules", async (req, res) => {
 });
 
 app.get("/api/rules", async (_req, res) => {
+  const auth = maybeRequireAuth(_req, res);
+  if (auth.required && !auth.user) return;
   res.json(await listRules());
 });
 
+app.get("/api/budgets", (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  const visible = budgets.filter((item) => item.memberIds.includes(user.id));
+  res.json(
+    visible.map((item) => ({
+      id: item.id,
+      name: item.name,
+      category: item.category,
+      account: item.account,
+      limit: item.limit,
+      is_owner: item.ownerId === user.id,
+      is_shared: item.memberIds.length > 1 || Boolean(item.shareToken),
+      member_count: item.memberIds.length,
+      share_token: item.ownerId === user.id ? item.shareToken ?? null : null,
+    })),
+  );
+});
+
+app.post("/api/budgets", (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  const name = typeof req.body?.name === "string" ? req.body.name.trim() : "";
+  const category = typeof req.body?.category === "string" ? req.body.category.trim() : "";
+  const account = req.body?.account === "business" ? "business" : "personal";
+  const limit = typeof req.body?.limit === "number" ? req.body.limit : 0;
+  if (!name || !category || limit <= 0) return res.status(400).json({ detail: "name, category, and positive limit are required" });
+  const created: BudgetResource = {
+    id: randomUUID(),
+    ownerId: user.id,
+    name,
+    category,
+    account,
+    limit,
+    memberIds: [user.id],
+  };
+  budgets.unshift(created);
+  res.status(201).json(created);
+});
+
+app.delete("/api/budgets/:id", (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  const index = budgets.findIndex((entry) => entry.id === req.params.id);
+  if (index < 0) return res.status(404).json({ detail: "Budget not found" });
+  const budget = budgets[index];
+  if (budget.ownerId === user.id) {
+    if (budget.shareToken) shareIndex.delete(budget.shareToken);
+    budgets.splice(index, 1);
+    return res.json({ ok: true });
+  }
+  if (!budget.memberIds.includes(user.id)) return res.status(404).json({ detail: "Budget not found" });
+  budget.memberIds = budget.memberIds.filter((entry) => entry !== user.id);
+  return res.json({ ok: true });
+});
+
+app.post("/api/budgets/:id/share", (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  const budget = budgets.find((entry) => entry.id === req.params.id && entry.ownerId === user.id);
+  if (!budget) return res.status(404).json({ detail: "Budget not found" });
+  if (!budget.shareToken) {
+    budget.shareToken = randomUUID().replace(/-/g, "");
+    shareIndex.set(budget.shareToken, { kind: "budget", resourceId: budget.id, ownerId: user.id });
+  }
+  res.json({ token: budget.shareToken });
+});
+
+app.delete("/api/budgets/:id/share", (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  const budget = budgets.find((entry) => entry.id === req.params.id && entry.ownerId === user.id);
+  if (!budget) return res.status(404).json({ detail: "Budget not found" });
+  if (budget.shareToken) shareIndex.delete(budget.shareToken);
+  budget.shareToken = undefined;
+  budget.memberIds = [user.id];
+  res.json({ ok: true });
+});
+
 app.get("/api/categories", async (_req, res) => {
+  const auth = maybeRequireAuth(_req, res);
+  if (auth.required && !auth.user) return;
   res.json(await listCategories());
 });
 
 app.post("/api/categories", async (req, res) => {
+  const auth = maybeRequireAuth(req, res);
+  if (auth.required && !auth.user) return;
   const parsed = categorySchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   res.status(201).json(await addCategory(parsed.data.name));
 });
 
+app.get("/api/goals", (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  const visible = goals.filter((item) => item.memberIds.includes(user.id));
+  res.json(
+    visible.map((item) => ({
+      id: item.id,
+      name: item.name,
+      kind: item.kind,
+      target_amount: item.targetAmount,
+      current_amount: item.currentAmount,
+      monthly_contribution: item.monthlyContribution,
+      is_owner: item.ownerId === user.id,
+      is_shared: item.memberIds.length > 1 || Boolean(item.shareToken),
+      member_count: item.memberIds.length,
+      share_token: item.ownerId === user.id ? item.shareToken ?? null : null,
+    })),
+  );
+});
+
+app.post("/api/goals", (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  const name = typeof req.body?.name === "string" ? req.body.name.trim() : "";
+  const kind = typeof req.body?.kind === "string" ? req.body.kind : "savings";
+  const targetAmount = typeof req.body?.target_amount === "number" ? req.body.target_amount : 0;
+  const currentAmount = typeof req.body?.current_amount === "number" ? req.body.current_amount : 0;
+  const monthlyContribution = typeof req.body?.monthly_contribution === "number" ? req.body.monthly_contribution : 0;
+  if (!name || targetAmount <= 0) return res.status(400).json({ detail: "name and positive target_amount are required" });
+  const created: GoalResource = {
+    id: randomUUID(),
+    ownerId: user.id,
+    name,
+    kind,
+    targetAmount,
+    currentAmount: Math.max(0, currentAmount),
+    monthlyContribution: Math.max(0, monthlyContribution),
+    memberIds: [user.id],
+  };
+  goals.unshift(created);
+  res.status(201).json(created);
+});
+
+app.patch("/api/goals/:id", (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  const goal = goals.find((entry) => entry.id === req.params.id && entry.ownerId === user.id);
+  if (!goal) return res.status(404).json({ detail: "Goal not found" });
+  if (typeof req.body?.name === "string") goal.name = req.body.name.trim() || goal.name;
+  if (typeof req.body?.kind === "string") goal.kind = req.body.kind;
+  if (typeof req.body?.target_amount === "number" && req.body.target_amount > 0) goal.targetAmount = req.body.target_amount;
+  if (typeof req.body?.current_amount === "number") goal.currentAmount = Math.max(0, req.body.current_amount);
+  if (typeof req.body?.monthly_contribution === "number") goal.monthlyContribution = Math.max(0, req.body.monthly_contribution);
+  res.json({ ok: true, goal });
+});
+
+app.delete("/api/goals/:id", (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  const index = goals.findIndex((entry) => entry.id === req.params.id);
+  if (index < 0) return res.status(404).json({ detail: "Goal not found" });
+  const goal = goals[index];
+  if (goal.ownerId === user.id) {
+    if (goal.shareToken) shareIndex.delete(goal.shareToken);
+    goals.splice(index, 1);
+    return res.json({ ok: true });
+  }
+  if (!goal.memberIds.includes(user.id)) return res.status(404).json({ detail: "Goal not found" });
+  goal.memberIds = goal.memberIds.filter((entry) => entry !== user.id);
+  res.json({ ok: true });
+});
+
+app.post("/api/goals/:id/contribute", (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  const goal = goals.find((entry) => entry.id === req.params.id && entry.memberIds.includes(user.id));
+  if (!goal) return res.status(404).json({ detail: "Goal not found" });
+  const amount = typeof req.body?.amount === "number" ? req.body.amount : 0;
+  if (amount === 0) return res.status(400).json({ detail: "amount cannot be 0" });
+  goal.currentAmount = Math.max(0, goal.currentAmount + amount);
+  res.json({ ok: true, current_amount: goal.currentAmount });
+});
+
+app.post("/api/goals/:id/leave", (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  const goal = goals.find((entry) => entry.id === req.params.id);
+  if (!goal || !goal.memberIds.includes(user.id)) return res.status(404).json({ detail: "Goal not found" });
+  if (goal.ownerId === user.id) return res.status(400).json({ detail: "Owner cannot leave own goal" });
+  goal.memberIds = goal.memberIds.filter((entry) => entry !== user.id);
+  res.json({ ok: true });
+});
+
+app.post("/api/goals/:id/share", (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  const goal = goals.find((entry) => entry.id === req.params.id && entry.ownerId === user.id);
+  if (!goal) return res.status(404).json({ detail: "Goal not found" });
+  if (!goal.shareToken) {
+    goal.shareToken = randomUUID().replace(/-/g, "");
+    shareIndex.set(goal.shareToken, { kind: "goal", resourceId: goal.id, ownerId: user.id });
+  }
+  res.json({ token: goal.shareToken });
+});
+
+app.delete("/api/goals/:id/share", (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  const goal = goals.find((entry) => entry.id === req.params.id && entry.ownerId === user.id);
+  if (!goal) return res.status(404).json({ detail: "Goal not found" });
+  if (goal.shareToken) shareIndex.delete(goal.shareToken);
+  goal.shareToken = undefined;
+  goal.memberIds = [user.id];
+  res.json({ ok: true });
+});
+
+app.get("/api/shares/:token", (req, res) => {
+  const token = req.params.token;
+  const entry = shareIndex.get(token);
+  if (!entry) return res.status(404).json({ detail: "Share not found" });
+  const owner = users.find((candidate) => candidate.id === entry.ownerId);
+  if (entry.kind === "goal") {
+    const goal = goals.find((candidate) => candidate.id === entry.resourceId);
+    if (!goal) return res.status(404).json({ detail: "Share not found" });
+    return res.json({
+      kind: "goal",
+      name: goal.name,
+      owner_name: owner?.name ?? "Owner",
+      member_count: goal.memberIds.length,
+      kind_tag: goal.kind,
+      current_amount: goal.currentAmount,
+      target_amount: goal.targetAmount,
+      already_member: false,
+    });
+  }
+  const budget = budgets.find((candidate) => candidate.id === entry.resourceId);
+  if (!budget) return res.status(404).json({ detail: "Share not found" });
+  return res.json({
+    kind: "budget",
+    name: budget.name,
+    owner_name: owner?.name ?? "Owner",
+    member_count: budget.memberIds.length,
+    category: budget.category,
+    limit: budget.limit,
+    already_member: false,
+  });
+});
+
+app.post("/api/shares/:token/join", (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  const token = req.params.token;
+  const entry = shareIndex.get(token);
+  if (!entry) return res.status(404).json({ detail: "Share not found" });
+  if (entry.kind === "goal") {
+    const goal = goals.find((candidate) => candidate.id === entry.resourceId);
+    if (!goal) return res.status(404).json({ detail: "Share not found" });
+    if (!goal.memberIds.includes(user.id)) goal.memberIds.push(user.id);
+    return res.json({ ok: true, kind: "goal" });
+  }
+  const budget = budgets.find((candidate) => candidate.id === entry.resourceId);
+  if (!budget) return res.status(404).json({ detail: "Share not found" });
+  if (!budget.memberIds.includes(user.id)) budget.memberIds.push(user.id);
+  return res.json({ ok: true, kind: "budget" });
+});
+
+app.get("/api/preferences/dashboard", (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  res.json(dashboardPrefs.get(user.id) ?? { widgets: [] });
+});
+
+app.put("/api/preferences/dashboard", (req, res) => {
+  const user = requireAuth(req, res);
+  if (!user) return;
+  const widgets =
+    Array.isArray(req.body?.widgets)
+      ? req.body.widgets
+          .filter((entry: unknown) => typeof entry === "object" && entry !== null)
+          .map((entry: unknown) => {
+            const widget = entry as { id?: unknown; size?: unknown };
+            return {
+              id: typeof widget.id === "string" ? widget.id : "",
+              size: widget.size === "s" || widget.size === "m" || widget.size === "l" ? widget.size : "m",
+            };
+          })
+          .filter((entry: { id: string; size: "s" | "m" | "l" }) => entry.id.length > 0)
+      : [];
+  const payload = { widgets };
+  dashboardPrefs.set(user.id, payload);
+  res.json(payload);
+});
+
 app.get("/api/summary", async (_req, res) => {
+  const auth = maybeRequireAuth(_req, res);
+  if (auth.required && !auth.user) return;
   res.json(computeSummary(await listTransactions()));
 });
 
 app.get("/api/alerts", async (_req, res) => {
+  const auth = maybeRequireAuth(_req, res);
+  if (auth.required && !auth.user) return;
   const [transactions, rules] = await Promise.all([listTransactions(), listRules()]);
   const recurring = detectRecurringGroups(transactions);
-  res.json(evaluateAlerts(transactions, rules, recurring));
+  res.json(
+    evaluateAlerts(transactions, rules, recurring).map((alert) => ({
+      ...alert,
+      acknowledged: acknowledgedAlertIds.has(alert.id),
+      category: "all",
+      account: "all",
+    })),
+  );
+});
+
+app.post("/api/alerts/:id/ack", async (req, res) => {
+  const auth = maybeRequireAuth(req, res);
+  if (auth.required && !auth.user) return;
+  acknowledgedAlertIds.add(req.params.id);
+  res.json({ ok: true, id: req.params.id });
 });
 
 app.get("/api/recurring", async (_req, res) => {
+  const auth = maybeRequireAuth(_req, res);
+  if (auth.required && !auth.user) return;
   res.json(detectRecurringGroups(await listTransactions()));
 });
 
 app.get("/api/insights", async (_req, res) => {
+  const auth = maybeRequireAuth(_req, res);
+  if (auth.required && !auth.user) return;
   const [transactions, rules] = await Promise.all([listTransactions(), listRules()]);
-  const recurring = detectRecurringGroups(transactions);
-  const alerts = evaluateAlerts(transactions, rules, recurring);
-  const summary = computeSummary(transactions);
-  res.json(generateInsights(summary, alerts, recurring, rules));
+  const model = buildInsightsPayload(transactions, rules);
+  res.json({
+    txn_count_this_month: transactions.length,
+    income_this_month: 0,
+    expense_this_month: Number(model.summary.monthlyTotal.toFixed(2)),
+    mom_pct: 0,
+    safe_to_spend_daily: Number(model.safeToSpendDaily.toFixed(2)),
+    days_remaining: model.daysRemaining,
+    remaining_budget: Number(model.remainingBudget.toFixed(2)),
+    daily_series: model.summary.trend30Days.map((item) => ({ date: item.date, amount: item.amount })),
+    by_category: model.byCategory,
+    by_account: model.byAccount,
+  });
+});
+
+app.get("/api/insights/headline", async (req, res) => {
+  const auth = maybeRequireAuth(req, res);
+  if (auth.required && !auth.user) return;
+  const [transactions, rules] = await Promise.all([listTransactions(), listRules()]);
+  const model = buildInsightsPayload(transactions, rules);
+  const top = model.summary.top3Categories[0];
+  if (!top) {
+    return res.json({ headline: null, drill_down: [], action: null });
+  }
+  const byMerchant = transactions
+    .filter((tx) => tx.category === top.category)
+    .reduce<Record<string, number>>((acc, tx) => {
+      acc[tx.description] = (acc[tx.description] ?? 0) + tx.amount;
+      return acc;
+    }, {});
+  const drillDown = Object.entries(byMerchant)
+    .map(([merchant, amount]) => ({ merchant, amount }))
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, 5);
+  return res.json({
+    headline: {
+      title: `${top.category} is your highest category this month`,
+      detail: `You've spent HK$ ${top.amount.toFixed(0)} on ${top.category}.`,
+      tone: model.alerts.some((alert) => alert.severity !== "info") ? "warning" : "info",
+    },
+    drill_down: drillDown,
+    action: {
+      label: `Review ${top.category} transactions`,
+      cta: "Review transactions",
+      link: `/transactions?category=${encodeURIComponent(top.category)}`,
+    },
+  });
+});
+
+app.get("/api/insights/pacing", async (req, res) => {
+  const auth = maybeRequireAuth(req, res);
+  if (auth.required && !auth.user) return;
+  const [transactions, rules] = await Promise.all([listTransactions(), listRules()]);
+  const model = buildInsightsPayload(transactions, rules);
+  return res.json({
+    month_pct: Number(model.monthPct.toFixed(2)),
+    budgets: model.pacingBudgets,
+  });
 });
 
 app.get("/api/export", async (_req, res) => {
+  const auth = maybeRequireAuth(_req, res);
+  if (auth.required && !auth.user) return;
   const [transactions, rules, categories] = await Promise.all([listTransactions(), listRules(), listCategories()]);
   res.json({ transactions, rules, categories });
 });
@@ -277,6 +982,46 @@ app.post("/api/import", async (req, res) => {
   } catch (error) {
     return res.status(400).json({ error: error instanceof Error ? error.message : "Malformed import payload" });
   }
+});
+
+app.post("/api/demo/clear", async (req, res) => {
+  if (!requireProtectedMutationAccess(req, res)) return;
+  await replaceStore({ transactions: [], rules: [], categories: [...DEFAULT_CATEGORIES] });
+  budgets.splice(0, budgets.length);
+  goals.splice(0, goals.length);
+  acknowledgedAlertIds.clear();
+  shareIndex.clear();
+  dashboardPrefs.clear();
+  res.json({ ok: true });
+});
+
+app.post("/api/demo/seed", async (req, res) => {
+  if (!requireProtectedMutationAccess(req, res)) return;
+  const categories = await listCategories();
+  const now = new Date().toISOString().slice(0, 10);
+  await replaceStore({
+    categories,
+    rules: [],
+    transactions: [
+      {
+        date: now,
+        amount: 58.5,
+        category: "Food",
+        description: "Cafe lunch",
+        normalizedMerchant: normalizeMerchant("Cafe lunch"),
+        scope: "personal",
+      },
+      {
+        date: now,
+        amount: 120,
+        category: "Transport",
+        description: "MTR refill",
+        normalizedMerchant: normalizeMerchant("MTR refill"),
+        scope: "personal",
+      },
+    ],
+  });
+  res.json({ ok: true });
 });
 
 app.post("/api/generate-test-data", async (req, res) => {

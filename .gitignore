@@ -25,3 +25,6 @@ frontend/.vercel/
 .idea/
 .vscode/
 .vercel
+
+#graphify cache
+graphify-out/cache/
