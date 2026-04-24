@@ -1,11 +1,11 @@
 # Graph Report - financial_assistant_project  (2026-04-24)
 
 ## Corpus Check
-- 107 files · ~89,907 words
+- 107 files · ~89,921 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 310 nodes · 412 edges · 11 communities detected
+- 310 nodes · 413 edges · 13 communities detected
 - Extraction: 78% EXTRACTED · 22% INFERRED · 0% AMBIGUOUS · INFERRED: 91 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -21,6 +21,8 @@
 - [[_COMMUNITY_Community 8|Community 8]]
 - [[_COMMUNITY_Community 10|Community 10]]
 - [[_COMMUNITY_Community 11|Community 11]]
+- [[_COMMUNITY_Community 12|Community 12]]
+- [[_COMMUNITY_Community 13|Community 13]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `cn()` - 28 edges
@@ -37,44 +39,44 @@
 ## Surprising Connections (you probably didn't know these)
 - `todayIsoDate()` --calls--> `toIsoString()`  [INFERRED]
   frontend/src/components/QuickAddDialog.js → backend/src/repository.ts
+- `QuickAddImportPanel()` --calls--> `cn()`  [INFERRED]
+  frontend/src/components/QuickAddImportPanel.js → frontend/src/lib/utils.js
 - `MenubarShortcut()` --calls--> `cn()`  [INFERRED]
   frontend/src/components/ui/menubar.jsx → frontend/src/lib/utils.js
 - `SafeToSpend()` --calls--> `HKD()`  [INFERRED]
   frontend/src/components/widgets/registry.js → frontend/src/lib/format.js
-- `Protected()` --calls--> `useAuth()`  [INFERRED]
-  frontend/src/App.js → frontend/src/contexts/AuthContext.js
-- `RootRedirect()` --calls--> `useAuth()`  [INFERRED]
-  frontend/src/App.js → frontend/src/contexts/AuthContext.js
+- `getEnv()` --calls--> `disconnectDatabase()`  [INFERRED]
+  backend/src/config/env.ts → backend/src/config/db.ts
 
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.05
-Nodes (25): AlertDialogFooter(), AlertDialogHeader(), Badge(), BreadcrumbEllipsis(), BreadcrumbSeparator(), Calendar(), CommandShortcut(), ContextMenuShortcut() (+17 more)
+Cohesion: 0.06
+Nodes (24): AlertDialogFooter(), AlertDialogHeader(), Badge(), BreadcrumbEllipsis(), BreadcrumbSeparator(), Calendar(), CommandShortcut(), ContextMenuShortcut() (+16 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.13
-Nodes (25): buildBootstrapPayload(), connectDatabase(), disconnectDatabase(), getEnv(), parseOrigins(), parsePort(), escapeRegex(), addCategory() (+17 more)
+Cohesion: 0.09
+Nodes (22): buildInsightsPayload(), createAuthToken(), getAuthUser(), getBearerToken(), getJwtSecret(), importPayload(), maybeRequireAuth(), origin() (+14 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.1
-Nodes (21): buildInsightsPayload(), createAuthToken(), getAuthUser(), getBearerToken(), getJwtSecret(), importPayload(), maybeRequireAuth(), origin() (+13 more)
+Cohesion: 0.11
+Nodes (15): buildMerchantHints(), buildRecentEntryHelpers(), suggestCategory(), toFrequencyMap(), createInsight(), generateInsights(), classifyKind(), detectFrequency() (+7 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.08
 Nodes (12): OnboardingGuard(), Protected(), RootRedirect(), AppShell(), useAuth(), Dashboard(), greeting(), JoinShare() (+4 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.13
-Nodes (15): buildCapAlerts(), createAlert(), evaluateAlerts(), filterByPeriod(), filterByScope(), getStreakLength(), classifyKind(), detectFrequency() (+7 more)
+Cohesion: 0.17
+Nodes (22): buildBootstrapPayload(), getEnv(), parseOrigins(), parsePort(), escapeRegex(), addCategory(), appendTransactions(), countTransactions() (+14 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.13
 Nodes (13): dayShort(), fullDate(), HKD(), parseCalendarDate(), shortDate(), GoalCard(), Goals(), Insights() (+5 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.19
-Nodes (14): coerceAmount(), coerceDate(), fingerprintTransaction(), guessColumnMap(), isKnownCategory(), normalizeHeader(), previewBulkImport(), rowFromCsvRecord() (+6 more)
+Cohesion: 0.31
+Nodes (10): coerceAmount(), coerceDate(), fingerprintTransaction(), guessColumnMap(), isKnownCategory(), normalizeHeader(), previewBulkImport(), rowFromCsvRecord() (+2 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.22
@@ -86,26 +88,36 @@ Nodes (7): Toaster(), addToRemoveQueue(), dispatch(), genId(), reducer(), toast(
 
 ### Community 10 - "Community 10"
 Cohesion: 0.29
-Nodes (1): MenubarShortcut()
+Nodes (1): QuickAddImportPanel()
 
 ### Community 11 - "Community 11"
+Cohesion: 0.29
+Nodes (1): MenubarShortcut()
+
+### Community 12 - "Community 12"
+Cohesion: 0.57
+Nodes (6): buildCapAlerts(), createAlert(), evaluateAlerts(), filterByPeriod(), filterByScope(), getStreakLength()
+
+### Community 13 - "Community 13"
 Cohesion: 0.47
 Nodes (5): autoSourceDescription(), buildCreateTransactionBody(), CategoryPicker(), QuickAddDialog(), todayIsoDate()
 
 ## Knowledge Gaps
 - **Thin community `Community 7`** (9 nodes): `registry.js`, `Alerts()`, `Categories()`, `GoalsWidget()`, `Headline()`, `Metric()`, `Pacing()`, `Recent()`, `SafeToSpend()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 10`** (7 nodes): `menubar.jsx`, `MenubarGroup()`, `MenubarMenu()`, `MenubarPortal()`, `MenubarRadioGroup()`, `MenubarShortcut()`, `MenubarSub()`
+- **Thin community `Community 10`** (7 nodes): `QuickAddImportPanel.js`, `headerFingerprint()`, `loadColumnOverrides()`, `QuickAddImportPanel()`, `saveColumnOverrides()`, `sniffFormat()`, `StatusIcon()`
+  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
+- **Thin community `Community 11`** (7 nodes): `menubar.jsx`, `MenubarGroup()`, `MenubarMenu()`, `MenubarPortal()`, `MenubarRadioGroup()`, `MenubarShortcut()`, `MenubarSub()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `todayIsoDate()` connect `Community 11` to `Community 1`?**
+- **Why does `todayIsoDate()` connect `Community 13` to `Community 4`?**
   _High betweenness centrality (0.268) - this node is a cross-community bridge._
-- **Why does `toIsoString()` connect `Community 1` to `Community 11`?**
+- **Why does `toIsoString()` connect `Community 4` to `Community 13`?**
   _High betweenness centrality (0.268) - this node is a cross-community bridge._
-- **Why does `QuickAddDialog()` connect `Community 11` to `Community 0`, `Community 5`?**
+- **Why does `QuickAddDialog()` connect `Community 13` to `Community 0`, `Community 5`?**
   _High betweenness centrality (0.267) - this node is a cross-community bridge._
 - **Are the 27 inferred relationships involving `cn()` (e.g. with `CategoryPicker()` and `QuickAddDialog()`) actually correct?**
   _`cn()` has 27 INFERRED edges - model-reasoned connections that need verification._
