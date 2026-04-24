@@ -479,8 +479,8 @@ function buildInsightsPayload(transactions: Transaction[], rules: BudgetRule[]) 
 
 export const app = express();
 
-/** Helmet default interop: TS 6 + NodeNext can type `default` as the module object on some installs. */
-const helmet = helmetModule.default as (options?: Readonly<HelmetOptions>) => RequestHandler;
+/** Helmet default interop: TS 6 + NodeNext types `default` as the module object; assert via `unknown` (TS2352). */
+const helmet = helmetModule.default as unknown as (options?: Readonly<HelmetOptions>) => RequestHandler;
 app.use(
   helmet({
     contentSecurityPolicy: false,
