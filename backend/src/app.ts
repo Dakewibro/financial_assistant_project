@@ -1,8 +1,6 @@
 import { adminSecretsEqual, normalizeClientAdminToken, readAdminTokenFromRequest } from "./utils/adminToken.js";
 import cors from "cors";
 import express from "express";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -55,20 +53,12 @@ import {
   type AuthUserShape as AuthUser,
 } from "./userRepository.js";
 import { budgets, goals, shareIndex, dashboardPrefs, type BudgetResource, type GoalResource } from "./workspaceRuntime.js";
+import { DEMO_SCENARIO_IDS, getDemoScenarioPayload, type DemoScenarioId } from "./demoScenarioPayloads.js";
 import { hydrateWorkspaceFromMongo, installWorkspacePersistOnFinish, touchWorkspace } from "./workspacePersistence.js";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek.js";
 
 dayjs.extend(isoWeek);
-
-const DEMO_SCENARIO_IDS = [
-  "food-cap",
-  "transport-budget",
-  "subscription-creep",
-  "merchant-memory",
-  "freelancer-month",
-  "household-side-hustle",
-] as const;
 
 interface ImportPayload {
   transactions: Array<Omit<Transaction, "id" | "createdAt" | "updatedAt">>;
@@ -1508,12 +1498,11 @@ function seedDemoGoalsForScenario(scenarioId: string, ownerId: string, memberIds
 app.post("/api/demo/load-scenario", async (req, res) => {
   if (!requireProtectedDemoAccess(req, res)) return;
   const id = typeof req.body?.scenario === "string" ? req.body.scenario.trim() : "";
-  if (!DEMO_SCENARIO_IDS.includes(id as (typeof DEMO_SCENARIO_IDS)[number])) {
+  if (!DEMO_SCENARIO_IDS.includes(id as DemoScenarioId)) {
     return res.status(400).json({ error: "Unknown scenario" });
   }
   try {
-    const file = join(process.cwd(), "demo-scenarios", `${id}.json`);
-    const raw = JSON.parse(readFileSync(file, "utf8")) as unknown;
+    const raw = getDemoScenarioPayload(id as DemoScenarioId);
     const targetLast = dayjs().subtract(1, "day").format("YYYY-MM-DD");
     const body = alignScenarioFileDatesForDemoLoad(raw, targetLast);
     await importPayload(body);

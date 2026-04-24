@@ -4,6 +4,7 @@
   "description": "Finance assistant backend API",
   "main": "dist/server.js",
   "scripts": {
+    "predev": "npm run copy-demo-scenarios",
     "dev": "tsx src/server.ts",
     "copy-demo-scenarios": "node scripts/copy-demo-scenarios.mjs",
     "prebuild": "npm run copy-demo-scenarios",

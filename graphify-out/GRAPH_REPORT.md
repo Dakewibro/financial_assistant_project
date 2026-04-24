@@ -1,11 +1,11 @@
 # Graph Report - financial_assistant_project  (2026-04-24)
 
 ## Corpus Check
-- 113 files · ~94,249 words
+- 114 files · ~94,373 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 335 nodes · 469 edges · 13 communities detected
+- 337 nodes · 471 edges · 12 communities detected
 - Extraction: 77% EXTRACTED · 23% INFERRED · 0% AMBIGUOUS · INFERRED: 106 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -22,7 +22,6 @@
 - [[_COMMUNITY_Community 10|Community 10]]
 - [[_COMMUNITY_Community 11|Community 11]]
 - [[_COMMUNITY_Community 12|Community 12]]
-- [[_COMMUNITY_Community 17|Community 17]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `getEnv()` - 33 edges
@@ -55,7 +54,7 @@ Cohesion: 0.06
 Nodes (29): AlertDialogFooter(), AlertDialogHeader(), Badge(), BreadcrumbEllipsis(), BreadcrumbSeparator(), Calendar(), CommandShortcut(), ContextMenuShortcut() (+21 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.08
+Cohesion: 0.07
 Nodes (24): attachAuthUser(), createAuthToken(), getAuthUser(), getBearerToken(), getJwtSecret(), importPayload(), maybeRequireAuth(), origin() (+16 more)
 
 ### Community 2 - "Community 2"
@@ -63,8 +62,8 @@ Cohesion: 0.13
 Nodes (29): buildBootstrapPayload(), connectDatabase(), getEnv(), isDeployProduction(), parseAuthEnforced(), parseDemoMutationsEnabled(), parseOrigins(), parsePort() (+21 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.11
-Nodes (18): buildCapAlerts(), createAlert(), evaluateAlerts(), filterByPeriod(), filterByScope(), getStreakLength(), buildInsightsPayload(), scopedForRule() (+10 more)
+Cohesion: 0.1
+Nodes (20): buildCapAlerts(), createAlert(), evaluateAlerts(), filterByPeriod(), filterByScope(), getStreakLength(), buildInsightsPayload(), scopedForRule() (+12 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.08
@@ -98,10 +97,6 @@ Nodes (1): MenubarShortcut()
 Cohesion: 0.48
 Nodes (5): createUser(), findUserByEmail(), findUserById(), mapUser(), updateUserById()
 
-### Community 17 - "Community 17"
-Cohesion: 1.0
-Nodes (2): createInsight(), generateInsights()
-
 ## Knowledge Gaps
 - **Thin community `Community 8`** (9 nodes): `registry.js`, `Alerts()`, `Categories()`, `GoalsWidget()`, `Headline()`, `Metric()`, `Pacing()`, `Recent()`, `SafeToSpend()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
@@ -109,14 +104,12 @@ Nodes (2): createInsight(), generateInsights()
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 11`** (7 nodes): `menubar.jsx`, `MenubarGroup()`, `MenubarMenu()`, `MenubarPortal()`, `MenubarRadioGroup()`, `MenubarShortcut()`, `MenubarSub()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 17`** (3 nodes): `insightService.ts`, `createInsight()`, `generateInsights()`
-  Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `toIsoString()` connect `Community 2` to `Community 0`?**
-  _High betweenness centrality (0.280) - this node is a cross-community bridge._
+  _High betweenness centrality (0.281) - this node is a cross-community bridge._
 - **Why does `todayIsoDate()` connect `Community 0` to `Community 2`?**
   _High betweenness centrality (0.280) - this node is a cross-community bridge._
 - **Why does `QuickAddDialog()` connect `Community 0` to `Community 5`?**

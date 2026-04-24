@@ -15,7 +15,8 @@ const DEMO_SCENARIO_IDS = [
   "household-side-hustle",
 ];
 
-const outDir = join(backendRoot, "demo-scenarios");
+// Under `src/` so TypeScript can import JSON (bundled on Vercel); `process.cwd()/demo-scenarios` is not deployed.
+const outDir = join(backendRoot, "src", "demo-scenarios");
 mkdirSync(outDir, { recursive: true });
 
 for (const id of DEMO_SCENARIO_IDS) {
@@ -24,4 +25,4 @@ for (const id of DEMO_SCENARIO_IDS) {
   copyFileSync(src, dest);
 }
 
-console.log(`Copied ${DEMO_SCENARIO_IDS.length} demo scenarios to demo-scenarios/`);
+console.log(`Copied ${DEMO_SCENARIO_IDS.length} demo scenarios to src/demo-scenarios/`);

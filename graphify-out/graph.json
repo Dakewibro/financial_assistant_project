@@ -9,7 +9,7 @@
       "source_file": "frontend/vite.config.mjs",
       "source_location": "L1",
       "id": "frontend_vite_config_mjs",
-      "community": 18,
+      "community": 17,
       "norm_label": "vite.config.mjs"
     },
     {
@@ -18,7 +18,7 @@
       "source_file": "frontend/vite.config.mjs",
       "source_location": "L12",
       "id": "vite_config_manualchunks",
-      "community": 18,
+      "community": 17,
       "norm_label": "manualchunks()"
     },
     {
@@ -27,7 +27,7 @@
       "source_file": "frontend/src/main.jsx",
       "source_location": "L1",
       "id": "frontend_src_main_jsx",
-      "community": 29,
+      "community": 28,
       "norm_label": "main.jsx"
     },
     {
@@ -117,7 +117,7 @@
       "source_file": "frontend/src/components/ShareDialog.js",
       "source_location": "L1",
       "id": "frontend_src_components_sharedialog_js",
-      "community": 19,
+      "community": 18,
       "norm_label": "sharedialog.js"
     },
     {
@@ -126,7 +126,7 @@
       "source_file": "frontend/src/components/ShareDialog.js",
       "source_location": "L9",
       "id": "sharedialog_sharedialog",
-      "community": 19,
+      "community": 18,
       "norm_label": "sharedialog()"
     },
     {
@@ -432,7 +432,7 @@
       "source_file": "frontend/src/components/ui/avatar.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_avatar_jsx",
-      "community": 30,
+      "community": 29,
       "norm_label": "avatar.jsx"
     },
     {
@@ -441,7 +441,7 @@
       "source_file": "frontend/src/components/ui/toggle-group.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_toggle_group_jsx",
-      "community": 31,
+      "community": 30,
       "norm_label": "toggle-group.jsx"
     },
     {
@@ -477,7 +477,7 @@
       "source_file": "frontend/src/components/ui/radio-group.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_radio_group_jsx",
-      "community": 32,
+      "community": 31,
       "norm_label": "radio-group.jsx"
     },
     {
@@ -531,7 +531,7 @@
       "source_file": "frontend/src/components/ui/switch.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_switch_jsx",
-      "community": 33,
+      "community": 32,
       "norm_label": "switch.jsx"
     },
     {
@@ -540,7 +540,7 @@
       "source_file": "frontend/src/components/ui/carousel.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_carousel_jsx",
-      "community": 20,
+      "community": 19,
       "norm_label": "carousel.jsx"
     },
     {
@@ -549,7 +549,7 @@
       "source_file": "frontend/src/components/ui/carousel.jsx",
       "source_location": "L10",
       "id": "carousel_usecarousel",
-      "community": 20,
+      "community": 19,
       "norm_label": "usecarousel()"
     },
     {
@@ -621,7 +621,7 @@
       "source_file": "frontend/src/components/ui/input.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_input_jsx",
-      "community": 34,
+      "community": 33,
       "norm_label": "input.jsx"
     },
     {
@@ -630,7 +630,7 @@
       "source_file": "frontend/src/components/ui/textarea.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_textarea_jsx",
-      "community": 35,
+      "community": 34,
       "norm_label": "textarea.jsx"
     },
     {
@@ -639,7 +639,7 @@
       "source_file": "frontend/src/components/ui/select.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_select_jsx",
-      "community": 36,
+      "community": 35,
       "norm_label": "select.jsx"
     },
     {
@@ -666,7 +666,7 @@
       "source_file": "frontend/src/components/ui/collapsible.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_collapsible_jsx",
-      "community": 37,
+      "community": 36,
       "norm_label": "collapsible.jsx"
     },
     {
@@ -675,7 +675,7 @@
       "source_file": "frontend/src/components/ui/checkbox.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_checkbox_jsx",
-      "community": 38,
+      "community": 37,
       "norm_label": "checkbox.jsx"
     },
     {
@@ -684,7 +684,7 @@
       "source_file": "frontend/src/components/ui/toast.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_toast_jsx",
-      "community": 39,
+      "community": 38,
       "norm_label": "toast.jsx"
     },
     {
@@ -693,7 +693,7 @@
       "source_file": "frontend/src/components/ui/toggle.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_toggle_jsx",
-      "community": 40,
+      "community": 39,
       "norm_label": "toggle.jsx"
     },
     {
@@ -702,7 +702,7 @@
       "source_file": "frontend/src/components/ui/button.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_button_jsx",
-      "community": 41,
+      "community": 40,
       "norm_label": "button.jsx"
     },
     {
@@ -711,7 +711,7 @@
       "source_file": "frontend/src/components/ui/separator.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_separator_jsx",
-      "community": 42,
+      "community": 41,
       "norm_label": "separator.jsx"
     },
     {
@@ -720,7 +720,7 @@
       "source_file": "frontend/src/components/ui/table.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_table_jsx",
-      "community": 43,
+      "community": 42,
       "norm_label": "table.jsx"
     },
     {
@@ -747,7 +747,7 @@
       "source_file": "frontend/src/components/ui/input-otp.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_input_otp_jsx",
-      "community": 44,
+      "community": 43,
       "norm_label": "input-otp.jsx"
     },
     {
@@ -774,7 +774,7 @@
       "source_file": "frontend/src/components/ui/progress.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_progress_jsx",
-      "community": 45,
+      "community": 44,
       "norm_label": "progress.jsx"
     },
     {
@@ -783,7 +783,7 @@
       "source_file": "frontend/src/components/ui/popover.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_popover_jsx",
-      "community": 46,
+      "community": 45,
       "norm_label": "popover.jsx"
     },
     {
@@ -792,7 +792,7 @@
       "source_file": "frontend/src/components/ui/slider.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_slider_jsx",
-      "community": 47,
+      "community": 46,
       "norm_label": "slider.jsx"
     },
     {
@@ -801,7 +801,7 @@
       "source_file": "frontend/src/components/ui/card.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_card_jsx",
-      "community": 48,
+      "community": 47,
       "norm_label": "card.jsx"
     },
     {
@@ -810,7 +810,7 @@
       "source_file": "frontend/src/components/ui/tabs.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_tabs_jsx",
-      "community": 49,
+      "community": 48,
       "norm_label": "tabs.jsx"
     },
     {
@@ -900,7 +900,7 @@
       "source_file": "frontend/src/components/ui/aspect-ratio.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_aspect_ratio_jsx",
-      "community": 50,
+      "community": 49,
       "norm_label": "aspect-ratio.jsx"
     },
     {
@@ -909,7 +909,7 @@
       "source_file": "frontend/src/components/ui/alert.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_alert_jsx",
-      "community": 51,
+      "community": 50,
       "norm_label": "alert.jsx"
     },
     {
@@ -918,7 +918,7 @@
       "source_file": "frontend/src/components/ui/tooltip.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_tooltip_jsx",
-      "community": 52,
+      "community": 51,
       "norm_label": "tooltip.jsx"
     },
     {
@@ -963,7 +963,7 @@
       "source_file": "frontend/src/components/ui/accordion.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_accordion_jsx",
-      "community": 53,
+      "community": 52,
       "norm_label": "accordion.jsx"
     },
     {
@@ -972,7 +972,7 @@
       "source_file": "frontend/src/components/ui/navigation-menu.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_navigation_menu_jsx",
-      "community": 54,
+      "community": 53,
       "norm_label": "navigation-menu.jsx"
     },
     {
@@ -981,7 +981,7 @@
       "source_file": "frontend/src/components/ui/sonner.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_sonner_jsx",
-      "community": 21,
+      "community": 20,
       "norm_label": "sonner.jsx"
     },
     {
@@ -990,7 +990,7 @@
       "source_file": "frontend/src/components/ui/sonner.jsx",
       "source_location": "L4",
       "id": "sonner_toaster",
-      "community": 21,
+      "community": 20,
       "norm_label": "toaster()"
     },
     {
@@ -999,7 +999,7 @@
       "source_file": "frontend/src/components/ui/label.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_label_jsx",
-      "community": 55,
+      "community": 54,
       "norm_label": "label.jsx"
     },
     {
@@ -1035,7 +1035,7 @@
       "source_file": "frontend/src/components/ui/scroll-area.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_scroll_area_jsx",
-      "community": 56,
+      "community": 55,
       "norm_label": "scroll-area.jsx"
     },
     {
@@ -1071,7 +1071,7 @@
       "source_file": "frontend/src/components/ui/hover-card.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_hover_card_jsx",
-      "community": 57,
+      "community": 56,
       "norm_label": "hover-card.jsx"
     },
     {
@@ -1341,7 +1341,7 @@
       "source_file": "frontend/src/lib/appEvents.js",
       "source_location": "L1",
       "id": "frontend_src_lib_appevents_js",
-      "community": 22,
+      "community": 21,
       "norm_label": "appevents.js"
     },
     {
@@ -1350,7 +1350,7 @@
       "source_file": "frontend/src/lib/appEvents.js",
       "source_location": "L4",
       "id": "appevents_invalidatealertcount",
-      "community": 22,
+      "community": 21,
       "norm_label": "invalidatealertcount()"
     },
     {
@@ -1377,7 +1377,7 @@
       "source_file": "frontend/src/lib/api.js",
       "source_location": "L1",
       "id": "frontend_src_lib_api_js",
-      "community": 23,
+      "community": 22,
       "norm_label": "api.js"
     },
     {
@@ -1386,7 +1386,7 @@
       "source_file": "frontend/src/lib/api.js",
       "source_location": "L18",
       "id": "api_formatapierror",
-      "community": 23,
+      "community": 22,
       "norm_label": "formatapierror()"
     },
     {
@@ -1422,7 +1422,7 @@
       "source_file": "frontend/src/pages 2/SettingsPage 2.tsx",
       "source_location": "L1",
       "id": "frontend_src_pages_2_settingspage_2_tsx",
-      "community": 24,
+      "community": 23,
       "norm_label": "settingspage 2.tsx"
     },
     {
@@ -1431,7 +1431,7 @@
       "source_file": "frontend/src/pages 2/SettingsPage 2.tsx",
       "source_location": "L4",
       "id": "settingspage_2_settingspage",
-      "community": 24,
+      "community": 23,
       "norm_label": "settingspage()"
     },
     {
@@ -1440,7 +1440,7 @@
       "source_file": "frontend/src/pages 2/AlertsPage 2.tsx",
       "source_location": "L1",
       "id": "frontend_src_pages_2_alertspage_2_tsx",
-      "community": 25,
+      "community": 24,
       "norm_label": "alertspage 2.tsx"
     },
     {
@@ -1449,7 +1449,7 @@
       "source_file": "frontend/src/pages 2/AlertsPage 2.tsx",
       "source_location": "L5",
       "id": "alertspage_2_alertspage",
-      "community": 25,
+      "community": 24,
       "norm_label": "alertspage()"
     },
     {
@@ -1458,7 +1458,7 @@
       "source_file": "frontend/src/pages 2/RecurringPage 2.tsx",
       "source_location": "L1",
       "id": "frontend_src_pages_2_recurringpage_2_tsx",
-      "community": 58,
+      "community": 57,
       "norm_label": "recurringpage 2.tsx"
     },
     {
@@ -1467,7 +1467,7 @@
       "source_file": "frontend/src/pages 2/InsightsPage 2.tsx",
       "source_location": "L1",
       "id": "frontend_src_pages_2_insightspage_2_tsx",
-      "community": 26,
+      "community": 25,
       "norm_label": "insightspage 2.tsx"
     },
     {
@@ -1476,7 +1476,7 @@
       "source_file": "frontend/src/pages 2/InsightsPage 2.tsx",
       "source_location": "L6",
       "id": "insightspage_2_insightspage",
-      "community": 26,
+      "community": 25,
       "norm_label": "insightspage()"
     },
     {
@@ -1575,7 +1575,7 @@
       "source_file": "frontend/src/pages/Alerts.js",
       "source_location": "L1",
       "id": "frontend_src_pages_alerts_js",
-      "community": 27,
+      "community": 26,
       "norm_label": "alerts.js"
     },
     {
@@ -1584,7 +1584,7 @@
       "source_file": "frontend/src/pages/Alerts.js",
       "source_location": "L11",
       "id": "alerts_alerts",
-      "community": 27,
+      "community": 26,
       "norm_label": "alerts()"
     },
     {
@@ -1746,7 +1746,7 @@
       "source_file": "frontend/src/pages/Budgets.js",
       "source_location": "L1",
       "id": "frontend_src_pages_budgets_js",
-      "community": 28,
+      "community": 27,
       "norm_label": "budgets.js"
     },
     {
@@ -1755,7 +1755,7 @@
       "source_file": "frontend/src/pages/Budgets.js",
       "source_location": "L17",
       "id": "budgets_budgets",
-      "community": 28,
+      "community": 27,
       "norm_label": "budgets()"
     },
     {
@@ -1809,7 +1809,7 @@
       "source_file": "backend/tests/bootstrap.integration.test.ts",
       "source_location": "L1",
       "id": "backend_tests_bootstrap_integration_test_ts",
-      "community": 59,
+      "community": 58,
       "norm_label": "bootstrap.integration.test.ts"
     },
     {
@@ -1908,7 +1908,7 @@
       "source_file": "backend/scripts/copy-demo-scenarios.mjs",
       "source_location": "L1",
       "id": "backend_scripts_copy_demo_scenarios_mjs",
-      "community": 60,
+      "community": 59,
       "norm_label": "copy-demo-scenarios.mjs"
     },
     {
@@ -2311,7 +2311,7 @@
       "label": "originAllowed()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L98",
+      "source_location": "L88",
       "id": "app_originallowed",
       "community": 1,
       "norm_label": "originallowed()"
@@ -2320,7 +2320,7 @@
       "label": "parseScope()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L110",
+      "source_location": "L100",
       "id": "app_parsescope",
       "community": 1,
       "norm_label": "parsescope()"
@@ -2329,7 +2329,7 @@
       "label": "parseFlowFilter()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L114",
+      "source_location": "L104",
       "id": "app_parseflowfilter",
       "community": 1,
       "norm_label": "parseflowfilter()"
@@ -2338,7 +2338,7 @@
       "label": "parseTransactionFilters()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L122",
+      "source_location": "L112",
       "id": "app_parsetransactionfilters",
       "community": 1,
       "norm_label": "parsetransactionfilters()"
@@ -2347,7 +2347,7 @@
       "label": "getJwtSecret()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L138",
+      "source_location": "L128",
       "id": "app_getjwtsecret",
       "community": 1,
       "norm_label": "getjwtsecret()"
@@ -2356,7 +2356,7 @@
       "label": "getBearerToken()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L142",
+      "source_location": "L132",
       "id": "app_getbearertoken",
       "community": 1,
       "norm_label": "getbearertoken()"
@@ -2365,7 +2365,7 @@
       "label": "createAuthToken()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L149",
+      "source_location": "L139",
       "id": "app_createauthtoken",
       "community": 1,
       "norm_label": "createauthtoken()"
@@ -2374,7 +2374,7 @@
       "label": "attachAuthUser()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L155",
+      "source_location": "L145",
       "id": "app_attachauthuser",
       "community": 1,
       "norm_label": "attachauthuser()"
@@ -2383,7 +2383,7 @@
       "label": "getAuthUser()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L180",
+      "source_location": "L170",
       "id": "app_getauthuser",
       "community": 1,
       "norm_label": "getauthuser()"
@@ -2392,7 +2392,7 @@
       "label": "maybeRequireAuth()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L184",
+      "source_location": "L174",
       "id": "app_mayberequireauth",
       "community": 1,
       "norm_label": "mayberequireauth()"
@@ -2401,7 +2401,7 @@
       "label": "requireAuth()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L195",
+      "source_location": "L185",
       "id": "app_requireauth",
       "community": 1,
       "norm_label": "requireauth()"
@@ -2410,7 +2410,7 @@
       "label": "validateProtectedMutationAccess()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L204",
+      "source_location": "L194",
       "id": "app_validateprotectedmutationaccess",
       "community": 1,
       "norm_label": "validateprotectedmutationaccess()"
@@ -2419,7 +2419,7 @@
       "label": "requireProtectedMutationAccess()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L238",
+      "source_location": "L228",
       "id": "app_requireprotectedmutationaccess",
       "community": 1,
       "norm_label": "requireprotectedmutationaccess()"
@@ -2428,7 +2428,7 @@
       "label": "requireProtectedDemoAccess()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L250",
+      "source_location": "L240",
       "id": "app_requireprotecteddemoaccess",
       "community": 1,
       "norm_label": "requireprotecteddemoaccess()"
@@ -2437,7 +2437,7 @@
       "label": "parseImportPayload()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L257",
+      "source_location": "L247",
       "id": "app_parseimportpayload",
       "community": 1,
       "norm_label": "parseimportpayload()"
@@ -2446,7 +2446,7 @@
       "label": "importPayload()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L305",
+      "source_location": "L295",
       "id": "app_importpayload",
       "community": 1,
       "norm_label": "importpayload()"
@@ -2455,7 +2455,7 @@
       "label": "refreshBudgetsFromRules()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L324",
+      "source_location": "L314",
       "id": "app_refreshbudgetsfromrules",
       "community": 1,
       "norm_label": "refreshbudgetsfromrules()"
@@ -2464,7 +2464,7 @@
       "label": "txMatchesBudgetPeriod()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L362",
+      "source_location": "L352",
       "id": "app_txmatchesbudgetperiod",
       "community": 1,
       "norm_label": "txmatchesbudgetperiod()"
@@ -2473,7 +2473,7 @@
       "label": "scopedForRule()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L370",
+      "source_location": "L360",
       "id": "app_scopedforrule",
       "community": 3,
       "norm_label": "scopedforrule()"
@@ -2482,7 +2482,7 @@
       "label": "spentAndPctForBudget()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L375",
+      "source_location": "L365",
       "id": "app_spentandpctforbudget",
       "community": 3,
       "norm_label": "spentandpctforbudget()"
@@ -2491,7 +2491,7 @@
       "label": "buildBootstrapPayload()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L406",
+      "source_location": "L396",
       "id": "app_buildbootstrappayload",
       "community": 2,
       "norm_label": "buildbootstrappayload()"
@@ -2500,7 +2500,7 @@
       "label": "buildInsightsPayload()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L427",
+      "source_location": "L417",
       "id": "app_buildinsightspayload",
       "community": 3,
       "norm_label": "buildinsightspayload()"
@@ -2509,7 +2509,7 @@
       "label": "origin()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L538",
+      "source_location": "L528",
       "id": "app_origin",
       "community": 1,
       "norm_label": "origin()"
@@ -2518,7 +2518,7 @@
       "label": "alignScenarioFileDatesForDemoLoad()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L1427",
+      "source_location": "L1417",
       "id": "app_alignscenariofiledatesfordemoload",
       "community": 1,
       "norm_label": "alignscenariofiledatesfordemoload()"
@@ -2527,7 +2527,7 @@
       "label": "clearGoalShareTokens()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L1448",
+      "source_location": "L1438",
       "id": "app_cleargoalsharetokens",
       "community": 1,
       "norm_label": "cleargoalsharetokens()"
@@ -2536,7 +2536,7 @@
       "label": "seedDemoGoalsForScenario()",
       "file_type": "code",
       "source_file": "backend/src/app.ts",
-      "source_location": "L1454",
+      "source_location": "L1444",
       "id": "app_seeddemogoalsforscenario",
       "community": 1,
       "norm_label": "seeddemogoalsforscenario()"
@@ -2558,6 +2558,24 @@
       "id": "types_countsasexpense",
       "community": 3,
       "norm_label": "countsasexpense()"
+    },
+    {
+      "label": "demoScenarioPayloads.ts",
+      "file_type": "code",
+      "source_file": "backend/src/demoScenarioPayloads.ts",
+      "source_location": "L1",
+      "id": "backend_src_demoscenariopayloads_ts",
+      "community": 1,
+      "norm_label": "demoscenariopayloads.ts"
+    },
+    {
+      "label": "getDemoScenarioPayload()",
+      "file_type": "code",
+      "source_file": "backend/src/demoScenarioPayloads.ts",
+      "source_location": "L20",
+      "id": "demoscenariopayloads_getdemoscenariopayload",
+      "community": 1,
+      "norm_label": "getdemoscenariopayload()"
     },
     {
       "label": "server.ts",
@@ -2862,7 +2880,7 @@
       "source_file": "backend/src/services/insightService.ts",
       "source_location": "L1",
       "id": "backend_src_services_insightservice_ts",
-      "community": 17,
+      "community": 3,
       "norm_label": "insightservice.ts"
     },
     {
@@ -2871,7 +2889,7 @@
       "source_file": "backend/src/services/insightService.ts",
       "source_location": "L4",
       "id": "insightservice_createinsight",
-      "community": 17,
+      "community": 3,
       "norm_label": "createinsight()"
     },
     {
@@ -2880,7 +2898,7 @@
       "source_file": "backend/src/services/insightService.ts",
       "source_location": "L8",
       "id": "insightservice_generateinsights",
-      "community": 17,
+      "community": 3,
       "norm_label": "generateinsights()"
     },
     {
@@ -5484,7 +5502,7 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L48",
+      "source_location": "L46",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "backend_src_validation_ts",
@@ -5556,7 +5574,7 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L57",
+      "source_location": "L55",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "backend_src_workspaceruntime_ts",
@@ -5868,7 +5886,7 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L17",
+      "source_location": "L15",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "backend_src_repository_ts",
@@ -6408,7 +6426,7 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L49",
+      "source_location": "L47",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "backend_src_userrepository_ts",
@@ -6600,7 +6618,7 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L58",
+      "source_location": "L57",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "backend_src_workspacepersistence_ts",
@@ -6780,7 +6798,7 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L14",
+      "source_location": "L12",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "backend_src_alertservice_ts",
@@ -6888,7 +6906,7 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L15",
+      "source_location": "L13",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "backend_src_config_db_ts",
@@ -6900,7 +6918,7 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L16",
+      "source_location": "L14",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "backend_src_config_env_ts",
@@ -6912,7 +6930,7 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L32",
+      "source_location": "L30",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "backend_src_services_categorysuggestionservice_ts",
@@ -6924,7 +6942,7 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L33",
+      "source_location": "L31",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "backend_src_services_insightservice_ts",
@@ -6936,7 +6954,7 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L34",
+      "source_location": "L32",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "backend_src_services_recurringservice_ts",
@@ -6948,7 +6966,7 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L35",
+      "source_location": "L33",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "backend_src_summaryservice_ts",
@@ -6960,7 +6978,7 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L36",
+      "source_location": "L34",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "backend_src_types_ts",
@@ -6972,7 +6990,7 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L46",
+      "source_location": "L44",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "backend_src_utils_normalizemerchant_ts",
@@ -6984,7 +7002,7 @@
       "relation": "imports_from",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L47",
+      "source_location": "L45",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "backend_src_services_bulkimportservice_ts",
@@ -6993,10 +7011,22 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/app.ts",
+      "source_location": "L56",
+      "weight": 1.0,
+      "_src": "backend_src_app_ts",
+      "_tgt": "backend_src_demoscenariopayloads_ts",
+      "source": "backend_src_app_ts",
+      "target": "backend_src_demoscenariopayloads_ts",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L98",
+      "source_location": "L88",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_originallowed",
@@ -7008,7 +7038,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L110",
+      "source_location": "L100",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_parsescope",
@@ -7020,7 +7050,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L114",
+      "source_location": "L104",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_parseflowfilter",
@@ -7032,7 +7062,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L122",
+      "source_location": "L112",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_parsetransactionfilters",
@@ -7044,7 +7074,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L138",
+      "source_location": "L128",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_getjwtsecret",
@@ -7056,7 +7086,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L142",
+      "source_location": "L132",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_getbearertoken",
@@ -7068,7 +7098,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L149",
+      "source_location": "L139",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_createauthtoken",
@@ -7080,7 +7110,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L155",
+      "source_location": "L145",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_attachauthuser",
@@ -7092,7 +7122,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L180",
+      "source_location": "L170",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_getauthuser",
@@ -7104,7 +7134,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L184",
+      "source_location": "L174",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_mayberequireauth",
@@ -7116,7 +7146,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L195",
+      "source_location": "L185",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_requireauth",
@@ -7128,7 +7158,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L204",
+      "source_location": "L194",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_validateprotectedmutationaccess",
@@ -7140,7 +7170,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L238",
+      "source_location": "L228",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_requireprotectedmutationaccess",
@@ -7152,7 +7182,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L250",
+      "source_location": "L240",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_requireprotecteddemoaccess",
@@ -7164,7 +7194,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L257",
+      "source_location": "L247",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_parseimportpayload",
@@ -7176,7 +7206,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L305",
+      "source_location": "L295",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_importpayload",
@@ -7188,7 +7218,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L324",
+      "source_location": "L314",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_refreshbudgetsfromrules",
@@ -7200,7 +7230,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L362",
+      "source_location": "L352",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_txmatchesbudgetperiod",
@@ -7212,7 +7242,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L370",
+      "source_location": "L360",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_scopedforrule",
@@ -7224,7 +7254,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L375",
+      "source_location": "L365",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_spentandpctforbudget",
@@ -7236,7 +7266,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L406",
+      "source_location": "L396",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_buildbootstrappayload",
@@ -7248,7 +7278,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L427",
+      "source_location": "L417",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_buildinsightspayload",
@@ -7260,7 +7290,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L538",
+      "source_location": "L528",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_origin",
@@ -7272,7 +7302,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L1427",
+      "source_location": "L1417",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_alignscenariofiledatesfordemoload",
@@ -7284,7 +7314,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L1448",
+      "source_location": "L1438",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_cleargoalsharetokens",
@@ -7296,7 +7326,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L1454",
+      "source_location": "L1444",
       "weight": 1.0,
       "_src": "backend_src_app_ts",
       "_tgt": "app_seeddemogoalsforscenario",
@@ -7320,7 +7350,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L539",
+      "source_location": "L529",
       "weight": 1.0,
       "_src": "app_origin",
       "_tgt": "app_originallowed",
@@ -7344,7 +7374,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L126",
+      "source_location": "L116",
       "weight": 1.0,
       "_src": "app_parsetransactionfilters",
       "_tgt": "app_parsescope",
@@ -7356,7 +7386,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L132",
+      "source_location": "L122",
       "weight": 1.0,
       "_src": "app_parsetransactionfilters",
       "_tgt": "app_parseflowfilter",
@@ -7368,7 +7398,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L150",
+      "source_location": "L140",
       "weight": 1.0,
       "_src": "app_createauthtoken",
       "_tgt": "app_getjwtsecret",
@@ -7380,7 +7410,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L164",
+      "source_location": "L154",
       "weight": 1.0,
       "_src": "app_attachauthuser",
       "_tgt": "app_getjwtsecret",
@@ -7404,7 +7434,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L158",
+      "source_location": "L148",
       "weight": 1.0,
       "_src": "app_attachauthuser",
       "_tgt": "app_getbearertoken",
@@ -7428,7 +7458,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L187",
+      "source_location": "L177",
       "weight": 1.0,
       "_src": "app_mayberequireauth",
       "_tgt": "app_getauthuser",
@@ -7440,7 +7470,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L196",
+      "source_location": "L186",
       "weight": 1.0,
       "_src": "app_requireauth",
       "_tgt": "app_getauthuser",
@@ -7452,7 +7482,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L253",
+      "source_location": "L243",
       "weight": 1.0,
       "_src": "app_requireprotecteddemoaccess",
       "_tgt": "app_getauthuser",
@@ -7476,7 +7506,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L239",
+      "source_location": "L229",
       "weight": 1.0,
       "_src": "app_requireprotectedmutationaccess",
       "_tgt": "app_validateprotectedmutationaccess",
@@ -7500,7 +7530,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L252",
+      "source_location": "L242",
       "weight": 1.0,
       "_src": "app_requireprotecteddemoaccess",
       "_tgt": "app_requireprotectedmutationaccess",
@@ -7524,7 +7554,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L306",
+      "source_location": "L296",
       "weight": 1.0,
       "_src": "app_importpayload",
       "_tgt": "app_parseimportpayload",
@@ -7548,7 +7578,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L319",
+      "source_location": "L309",
       "weight": 1.0,
       "_src": "app_importpayload",
       "_tgt": "app_refreshbudgetsfromrules",
@@ -7572,7 +7602,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L382",
+      "source_location": "L372",
       "weight": 1.0,
       "_src": "app_spentandpctforbudget",
       "_tgt": "app_scopedforrule",
@@ -7584,7 +7614,7 @@
       "relation": "calls",
       "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
-      "source_location": "L454",
+      "source_location": "L444",
       "weight": 1.0,
       "_src": "app_buildinsightspayload",
       "_tgt": "app_scopedforrule",
@@ -7758,6 +7788,18 @@
       "_tgt": "backend_src_types_ts",
       "source": "backend_src_types_ts",
       "target": "backend_src_services_bulkimportservice_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/src/demoScenarioPayloads.ts",
+      "source_location": "L20",
+      "weight": 1.0,
+      "_src": "backend_src_demoscenariopayloads_ts",
+      "_tgt": "demoscenariopayloads_getdemoscenariopayload",
+      "source": "backend_src_demoscenariopayloads_ts",
+      "target": "demoscenariopayloads_getdemoscenariopayload",
       "confidence_score": 1.0
     },
     {
