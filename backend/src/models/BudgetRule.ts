@@ -26,6 +26,7 @@ const budgetRuleSchema = new Schema<BudgetRuleRecord>(
         "consecutive_overspend",
         "uncategorized_warning",
         "recurring_threshold",
+        "duplicate_amount",
       ],
       required: true,
     },

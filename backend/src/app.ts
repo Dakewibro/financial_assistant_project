@@ -1,5 +1,7 @@
 import cors from "cors";
 import express from "express";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -11,6 +13,8 @@ import { isDatabaseReady } from "./config/db.js";
 import { getEnv } from "./config/env.js";
 import {
   addCategory,
+  appendTransactions,
+  countTransactions,
   createRule,
   createTransaction,
   deleteTransaction,
@@ -18,6 +22,7 @@ import {
   listRules,
   listTransactions,
   replaceStore,
+  replaceTransactions,
   seedDefaultCategories,
 } from "./repository.js";
 import { buildRecentEntryHelpers } from "./services/categorySuggestionService.js";
@@ -27,7 +32,21 @@ import { detectRecurringGroups } from "./services/recurringService.js";
 import { computeSummary } from "./summaryService.js";
 import { DEFAULT_CATEGORIES, type BootstrapResponse, type BudgetRule, type Scope, type Transaction, type TransactionFilters } from "./types.js";
 import { normalizeMerchant } from "./utils/normalizeMerchant.js";
+import { previewBulkImport, type BulkColumnMap } from "./services/bulkImportService.js";
 import { budgetRuleSchema, categorySchema, transactionSchema } from "./validation.js";
+import dayjs from "dayjs";
+import isoWeek from "dayjs/plugin/isoWeek.js";
+
+dayjs.extend(isoWeek);
+
+const DEMO_SCENARIO_IDS = [
+  "food-cap",
+  "transport-budget",
+  "subscription-creep",
+  "merchant-memory",
+  "freelancer-month",
+  "household-side-hustle",
+] as const;
 
 interface ImportPayload {
   transactions: Array<Omit<Transaction, "id" | "createdAt" | "updatedAt">>;
@@ -51,6 +70,8 @@ type AuthUser = {
   primaryUse: "personal" | "freelancer" | "mixed";
 };
 
+type BudgetRuleRef = { ruleType: BudgetRule["ruleType"]; period: BudgetRule["period"] };
+
 type BudgetResource = {
   id: string;
   ownerId: string;
@@ -60,6 +81,8 @@ type BudgetResource = {
   limit: number;
   memberIds: string[];
   shareToken?: string;
+  /** Present when this row mirrors an imported budget rule (drives period math on GET /budgets). */
+  ruleRef?: BudgetRuleRef;
 };
 
 type GoalResource = {
@@ -257,7 +280,84 @@ export async function importPayload(body: unknown): Promise<{ importedTransactio
     categories: [...new Set([...DEFAULT_CATEGORIES, ...categories, ...derivedCategories])],
   });
 
+  await refreshBudgetsFromRules();
+
   return { importedTransactions: transactions.length, importedRules: rules.length };
+}
+
+async function refreshBudgetsFromRules(): Promise<void> {
+  budgets.splice(0, budgets.length);
+  const rules = await listRules();
+  const ownerId = users[0]?.id ?? "demo-user";
+  const memberIds = users.length ? users.map((u) => u.id) : [ownerId];
+  for (const rule of rules) {
+    if (!rule.enabled) continue;
+    const account: Scope = rule.scope ?? "personal";
+    if (rule.ruleType === "category_cap" && rule.category) {
+      budgets.push({
+        id: rule.id,
+        ownerId,
+        name: `${rule.category} ${rule.period} cap`,
+        category: rule.category,
+        account,
+        limit: rule.threshold,
+        memberIds,
+        ruleRef: { ruleType: rule.ruleType, period: rule.period },
+      });
+    } else if (rule.ruleType === "period_cap") {
+      const periodLabel = rule.period === "daily" ? "Daily" : rule.period === "weekly" ? "Weekly" : "Monthly";
+      budgets.push({
+        id: rule.id,
+        ownerId,
+        name: `${periodLabel} spending cap`,
+        category: "__period__",
+        account,
+        limit: rule.threshold,
+        memberIds,
+        ruleRef: { ruleType: rule.ruleType, period: rule.period },
+      });
+    }
+  }
+}
+
+function txMatchesBudgetPeriod(tx: Transaction, period: BudgetRule["period"]): boolean {
+  const today = dayjs();
+  const d = dayjs(tx.date);
+  if (period === "daily") return tx.date === today.format("YYYY-MM-DD");
+  if (period === "weekly") return d.isoWeek() === today.isoWeek() && d.year() === today.year();
+  return d.month() === today.month() && d.year() === today.year();
+}
+
+function scopedForRule(transactions: Transaction[], rule: BudgetRule | undefined): Transaction[] {
+  if (!rule || !rule.scope) return transactions;
+  return transactions.filter((tx) => tx.scope === rule.scope);
+}
+
+function spentAndPctForBudget(
+  b: BudgetResource,
+  transactions: Transaction[],
+  rules: BudgetRule[],
+): { spent: number; pct: number } {
+  const rule = rules.find((r) => r.id === b.id);
+  if (b.ruleRef?.ruleType === "period_cap" && rule) {
+    const scoped = scopedForRule(transactions, rule);
+    const periodTxs = scoped.filter((tx) => txMatchesBudgetPeriod(tx, rule.period));
+    const spent = periodTxs.reduce((sum, tx) => sum + tx.amount, 0);
+    return { spent: Number(spent.toFixed(2)), pct: b.limit > 0 ? (spent / b.limit) * 100 : 0 };
+  }
+  if (b.ruleRef?.ruleType === "category_cap" && rule?.category) {
+    const scoped = scopedForRule(transactions, rule);
+    const periodTxs = scoped.filter(
+      (tx) => txMatchesBudgetPeriod(tx, rule.period) && tx.category === rule.category,
+    );
+    const spent = periodTxs.reduce((sum, tx) => sum + tx.amount, 0);
+    return { spent: Number(spent.toFixed(2)), pct: b.limit > 0 ? (spent / b.limit) * 100 : 0 };
+  }
+  const monthTxs = transactions.filter(
+    (tx) => tx.scope === b.account && txMatchesBudgetPeriod(tx, "monthly") && tx.category === b.category,
+  );
+  const spent = monthTxs.reduce((sum, tx) => sum + tx.amount, 0);
+  return { spent: Number(spent.toFixed(2)), pct: b.limit > 0 ? (spent / b.limit) * 100 : 0 };
 }
 
 export async function buildBootstrapPayload(): Promise<BootstrapResponse> {
@@ -298,21 +398,68 @@ function buildInsightsPayload(transactions: Transaction[], rules: BudgetRule[]) 
     .sort((a, b) => b.amount - a.amount);
   const byAccount = (Object.entries(summary.byScope) as Array<[Scope, number]>).map(([account, amount]) => ({ account, amount }));
 
-  const pacingBudgets = rules
-    .filter((rule) => rule.ruleType === "category_cap" && rule.category)
-    .map((rule) => {
-      const spent = transactions.filter((tx) => tx.category === rule.category).reduce((sum, tx) => sum + tx.amount, 0);
+  const pacingBudgets: Array<{
+    budget_id: string;
+    name: string;
+    status: "on_track" | "slightly_fast" | "fast" | "over" | "under";
+    used_pct: number;
+    over_amount: number;
+  }> = [];
+
+  for (const rule of rules.filter((r) => r.enabled)) {
+    if (rule.ruleType === "category_cap" && rule.category) {
+      const scoped = scopedForRule(transactions, rule);
+      const periodTxs = scoped.filter((tx) => txMatchesBudgetPeriod(tx, rule.period));
+      const spent = periodTxs.filter((tx) => tx.category === rule.category).reduce((sum, tx) => sum + tx.amount, 0);
       const usedPct = rule.threshold > 0 ? (spent / rule.threshold) * 100 : 0;
       const delta = usedPct - monthPct;
       const status = delta > 25 ? "over" : delta > 10 ? "fast" : delta > 4 ? "slightly_fast" : delta < -8 ? "under" : "on_track";
-      return {
+      pacingBudgets.push({
         budget_id: rule.id,
         name: rule.category,
         status,
         used_pct: Number(usedPct.toFixed(2)),
         over_amount: status === "over" ? Number((spent - rule.threshold).toFixed(2)) : 0,
-      };
-    });
+      });
+    }
+    if (rule.ruleType === "period_cap") {
+      const scoped = scopedForRule(transactions, rule);
+      const periodTxs = scoped.filter((tx) => txMatchesBudgetPeriod(tx, rule.period));
+      const spent = periodTxs.reduce((sum, tx) => sum + tx.amount, 0);
+      const usedPct = rule.threshold > 0 ? (spent / rule.threshold) * 100 : 0;
+      const delta = usedPct - monthPct;
+      const status = delta > 25 ? "over" : delta > 10 ? "fast" : delta > 4 ? "slightly_fast" : delta < -8 ? "under" : "on_track";
+      const periodLabel = rule.period === "daily" ? "Daily" : rule.period === "weekly" ? "Weekly" : "Monthly";
+      pacingBudgets.push({
+        budget_id: rule.id,
+        name: `${periodLabel} total`,
+        status,
+        used_pct: Number(usedPct.toFixed(2)),
+        over_amount: status === "over" ? Number((spent - rule.threshold).toFixed(2)) : 0,
+      });
+    }
+    if (rule.ruleType === "category_percentage" && rule.category) {
+      const scoped = scopedForRule(transactions, rule);
+      const periodTxs = scoped.filter((tx) => txMatchesBudgetPeriod(tx, rule.period));
+      const periodAmount = periodTxs.reduce((sum, tx) => sum + tx.amount, 0);
+      if (periodAmount > 0) {
+        const categoryAmount = periodTxs
+          .filter((tx) => tx.category === rule.category)
+          .reduce((sum, tx) => sum + tx.amount, 0);
+        const ratio = (categoryAmount / periodAmount) * 100;
+        const usedPct = ratio;
+        const delta = usedPct - monthPct;
+        const status = delta > 25 ? "over" : delta > 10 ? "fast" : delta > 4 ? "slightly_fast" : delta < -8 ? "under" : "on_track";
+        pacingBudgets.push({
+          budget_id: rule.id,
+          name: `${rule.category} % of spend`,
+          status,
+          used_pct: Number(usedPct.toFixed(2)),
+          over_amount: 0,
+        });
+      }
+    }
+  }
 
   return {
     alerts,
@@ -347,6 +494,106 @@ app.use(
     },
   }),
 );
+
+const bulkImportRouter = express.Router();
+const bulkImportLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 40,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+bulkImportRouter.use(bulkImportLimiter);
+bulkImportRouter.use(express.json({ limit: "5mb" }));
+
+bulkImportRouter.post("/preview", (req, res) => {
+  const auth = maybeRequireAuth(req, res);
+  if (auth.required && !auth.user) return;
+  const format = req.body?.format === "json" ? "json" : "csv";
+  const text = typeof req.body?.text === "string" ? req.body.text : "";
+  const columnMap = (req.body?.columnMap ?? null) as BulkColumnMap | null;
+  if (!text.trim()) {
+    return res.status(400).json({ error: "text is required (raw file contents)" });
+  }
+  try {
+    const out = previewBulkImport({ format, text, columnMap });
+    return res.json(out);
+  } catch (error) {
+    return res.status(400).json({ error: error instanceof Error ? error.message : "Preview failed" });
+  }
+});
+
+bulkImportRouter.post("/apply", async (req, res) => {
+  const auth = maybeRequireAuth(req, res);
+  if (auth.required && !auth.user) return;
+  const mode = req.body?.mode === "replace" ? "replace" : "append";
+  const skipDuplicates = Boolean(req.body?.skipDuplicates);
+  const rawRows = Array.isArray(req.body?.transactions) ? req.body.transactions : [];
+
+  const validated: Array<{
+    date: string;
+    amount: number;
+    category: string;
+    description: string;
+    scope: Scope;
+    notes?: string;
+  }> = [];
+
+  for (const row of rawRows) {
+    const parsed = transactionSchema.safeParse(row);
+    if (parsed.success) validated.push(parsed.data);
+  }
+
+  if (validated.length === 0) {
+    return res.status(400).json({ error: "No valid transactions to import" });
+  }
+
+  let toWrite = validated;
+  let skippedDuplicates = 0;
+  if (skipDuplicates) {
+    const existing = await listTransactions();
+    const seen = new Set(
+      existing.map((tx) =>
+        `${tx.date}|${Number(tx.amount).toFixed(2)}|${normalizeMerchant(tx.description)}`,
+      ),
+    );
+    const before = toWrite.length;
+    toWrite = toWrite.filter(
+      (tx) => !seen.has(`${tx.date}|${Number(tx.amount).toFixed(2)}|${normalizeMerchant(tx.description)}`),
+    );
+    skippedDuplicates = before - toWrite.length;
+  }
+
+  if (mode === "replace") {
+    await replaceTransactions(
+      toWrite.map((tx) => ({
+        ...tx,
+        normalizedMerchant: normalizeMerchant(tx.description),
+      })),
+    );
+  } else {
+    await appendTransactions(
+      toWrite.map((tx) => ({
+        ...tx,
+        normalizedMerchant: normalizeMerchant(tx.description),
+      })),
+    );
+  }
+
+  const uniqueCats = [...new Set(toWrite.map((tx) => tx.category))];
+  for (const c of uniqueCats) {
+    await addCategory(c);
+  }
+
+  return res.json({
+    ok: true,
+    mode,
+    imported: toWrite.length,
+    skipped_duplicates: skippedDuplicates,
+  });
+});
+
+app.use("/api/bulk-import", bulkImportRouter);
+
 app.use(express.json({ limit: "1mb" }));
 
 const authLimiter = rateLimit({
@@ -497,6 +744,12 @@ app.get("/api/transactions", async (req, res) => {
   return res.json(transactions);
 });
 
+app.get("/api/transactions/count", async (_req, res) => {
+  const auth = maybeRequireAuth(_req, res);
+  if (auth.required && !auth.user) return;
+  res.json({ count: await countTransactions() });
+});
+
 app.delete("/api/transactions/:id", async (req, res) => {
   const auth = maybeRequireAuth(req, res);
   if (auth.required && !auth.user) return;
@@ -554,6 +807,8 @@ app.post("/api/parse-transaction", async (req, res) => {
     category: suggested.category,
     note: "",
     suggestions: [suggested.category],
+    source: suggested.source,
+    confidence: suggested.confidence,
   });
 });
 
@@ -564,7 +819,12 @@ app.post("/api/suggest-category", async (req, res) => {
   const note = typeof req.body?.note === "string" ? req.body.note : "";
   const tx = await listTransactions();
   const suggested = suggestCategoryFromHistory(`${merchant} ${note}`.trim(), tx);
-  return res.json({ suggestions: [suggested.category] });
+  return res.json({
+    suggestions: [suggested.category],
+    category: suggested.category,
+    source: suggested.source,
+    confidence: suggested.confidence,
+  });
 });
 
 app.post("/api/rules", async (req, res) => {
@@ -582,22 +842,31 @@ app.get("/api/rules", async (_req, res) => {
   res.json(await listRules());
 });
 
-app.get("/api/budgets", (req, res) => {
+app.get("/api/budgets", async (req, res) => {
   const user = requireAuth(req, res);
   if (!user) return;
-  const visible = budgets.filter((item) => item.memberIds.includes(user.id));
+  const [visible, transactions, rules] = await Promise.all([
+    Promise.resolve(budgets.filter((item) => item.memberIds.includes(user.id))),
+    listTransactions(),
+    listRules(),
+  ]);
   res.json(
-    visible.map((item) => ({
-      id: item.id,
-      name: item.name,
-      category: item.category,
-      account: item.account,
-      limit: item.limit,
-      is_owner: item.ownerId === user.id,
-      is_shared: item.memberIds.length > 1 || Boolean(item.shareToken),
-      member_count: item.memberIds.length,
-      share_token: item.ownerId === user.id ? item.shareToken ?? null : null,
-    })),
+    visible.map((item) => {
+      const { spent, pct } = spentAndPctForBudget(item, transactions, rules);
+      return {
+        id: item.id,
+        name: item.name,
+        category: item.category,
+        account: item.account,
+        limit: item.limit,
+        spent,
+        pct: Math.min(200, Number(pct.toFixed(2))),
+        is_owner: item.ownerId === user.id,
+        is_shared: item.memberIds.length > 1 || Boolean(item.shareToken),
+        member_count: item.memberIds.length,
+        share_token: item.ownerId === user.id ? item.shareToken ?? null : null,
+      };
+    }),
   );
 });
 
@@ -907,8 +1176,13 @@ app.get("/api/insights", async (_req, res) => {
   if (auth.required && !auth.user) return;
   const [transactions, rules] = await Promise.all([listTransactions(), listRules()]);
   const model = buildInsightsPayload(transactions, rules);
+  const today = dayjs();
+  const txnCountThisMonth = transactions.filter(
+    (tx) => dayjs(tx.date).month() === today.month() && dayjs(tx.date).year() === today.year(),
+  ).length;
   res.json({
-    txn_count_this_month: transactions.length,
+    txn_count_this_month: txnCountThisMonth,
+    total_transactions: transactions.length,
     income_this_month: 0,
     expense_this_month: Number(model.summary.monthlyTotal.toFixed(2)),
     mom_pct: 0,
@@ -916,8 +1190,8 @@ app.get("/api/insights", async (_req, res) => {
     days_remaining: model.daysRemaining,
     remaining_budget: Number(model.remainingBudget.toFixed(2)),
     daily_series: model.summary.trend30Days.map((item) => ({ date: item.date, amount: item.amount })),
-    by_category: model.byCategory,
-    by_account: model.byAccount,
+    by_category: Array.isArray(model.byCategory) ? model.byCategory : [],
+    by_account: Array.isArray(model.byAccount) ? model.byAccount : [],
   });
 });
 
@@ -930,6 +1204,15 @@ app.get("/api/insights/headline", async (req, res) => {
   if (!top) {
     return res.json({ headline: null, drill_down: [], action: null });
   }
+  const today = dayjs();
+  const spentThisMonth = transactions
+    .filter(
+      (tx) =>
+        tx.category === top.category &&
+        dayjs(tx.date).month() === today.month() &&
+        dayjs(tx.date).year() === today.year(),
+    )
+    .reduce((sum, tx) => sum + tx.amount, 0);
   const byMerchant = transactions
     .filter((tx) => tx.category === top.category)
     .reduce<Record<string, number>>((acc, tx) => {
@@ -940,10 +1223,15 @@ app.get("/api/insights/headline", async (req, res) => {
     .map(([merchant, amount]) => ({ merchant, amount }))
     .sort((a, b) => b.amount - a.amount)
     .slice(0, 5);
+  const thisMonthLabel = spentThisMonth > 0.001;
   return res.json({
     headline: {
-      title: `${top.category} is your highest category this month`,
-      detail: `You've spent HK$ ${top.amount.toFixed(0)} on ${top.category}.`,
+      title: thisMonthLabel
+        ? `${top.category} is your highest category this month`
+        : `${top.category} is your largest category in loaded data`,
+      detail: thisMonthLabel
+        ? `You've spent HK$ ${spentThisMonth.toFixed(0)} on ${top.category} this month.`
+        : `HK$ ${top.amount.toFixed(0)} total on ${top.category} in the ledger (nothing in the current calendar month yet).`,
       tone: model.alerts.some((alert) => alert.severity !== "info") ? "warning" : "info",
     },
     drill_down: drillDown,
@@ -987,12 +1275,133 @@ app.post("/api/import", async (req, res) => {
 app.post("/api/demo/clear", async (req, res) => {
   if (!requireProtectedMutationAccess(req, res)) return;
   await replaceStore({ transactions: [], rules: [], categories: [...DEFAULT_CATEGORIES] });
-  budgets.splice(0, budgets.length);
+  await refreshBudgetsFromRules();
   goals.splice(0, goals.length);
   acknowledgedAlertIds.clear();
   shareIndex.clear();
   dashboardPrefs.clear();
   res.json({ ok: true });
+});
+
+app.get("/api/demo/scenarios", (_req, res) => {
+  const labels: Record<string, string> = {
+    "food-cap": "Food daily cap (HK$50)",
+    "transport-budget": "Transport-heavy month (total + Transport caps on Budgets)",
+    "subscription-creep": "Subscription share",
+    "merchant-memory": "Merchant repeat + suggestion",
+    "freelancer-month": "Freelancer month (budgets + alerts + recurring + goals)",
+    "household-side-hustle": "Household + side hustle (scopes + goals)",
+  };
+  res.json({
+    scenarios: DEMO_SCENARIO_IDS.map((id) => ({ id, label: labels[id] ?? id })),
+  });
+});
+
+/** Shift all scenario transaction dates so the newest row lands on `targetLast` (preserves gaps). Rules unchanged. */
+function alignScenarioFileDatesForDemoLoad(body: unknown, targetLast: string): unknown {
+  if (!body || typeof body !== "object") return body;
+  const record = body as { transactions?: Array<{ date?: unknown } & Record<string, unknown>> };
+  const txs = Array.isArray(record.transactions) ? record.transactions : [];
+  if (txs.length === 0) return body;
+  const dates = txs
+    .map((t) => (typeof t.date === "string" ? t.date : ""))
+    .filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d));
+  if (dates.length === 0) return body;
+  const max = dates.reduce((m, d) => (d > m ? d : m), dates[0]);
+  const shiftDays = dayjs(targetLast).diff(dayjs(max), "day");
+  if (shiftDays === 0) return body;
+  return {
+    ...record,
+    transactions: txs.map((t) => {
+      if (typeof t.date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(t.date)) return t;
+      return { ...t, date: dayjs(t.date).add(shiftDays, "day").format("YYYY-MM-DD") };
+    }),
+  };
+}
+
+function clearGoalShareTokens(): void {
+  for (const [token, meta] of [...shareIndex.entries()]) {
+    if (meta.kind === "goal") shareIndex.delete(token);
+  }
+}
+
+function seedDemoGoalsForScenario(scenarioId: string): void {
+  const ownerId = users[0]?.id ?? "demo-user";
+  const memberIds = users.length > 0 ? users.map((u) => u.id) : [ownerId];
+  if (scenarioId === "freelancer-month") {
+    goals.push(
+      {
+        id: randomUUID(),
+        ownerId,
+        name: "Tax reserve (IR56)",
+        kind: "savings",
+        targetAmount: 12000,
+        currentAmount: 3200,
+        monthlyContribution: 1500,
+        memberIds,
+      },
+      {
+        id: randomUUID(),
+        ownerId,
+        name: "New laptop fund",
+        kind: "savings",
+        targetAmount: 15000,
+        currentAmount: 2800,
+        monthlyContribution: 800,
+        memberIds,
+      },
+    );
+    return;
+  }
+  if (scenarioId === "household-side-hustle") {
+    goals.push(
+      {
+        id: randomUUID(),
+        ownerId,
+        name: "Japan trip (household)",
+        kind: "savings",
+        targetAmount: 45000,
+        currentAmount: 12800,
+        monthlyContribution: 3500,
+        memberIds,
+      },
+      {
+        id: randomUUID(),
+        ownerId,
+        name: "Business equipment cushion",
+        kind: "savings",
+        targetAmount: 25000,
+        currentAmount: 9200,
+        monthlyContribution: 2200,
+        memberIds,
+      },
+    );
+  }
+}
+
+app.post("/api/demo/load-scenario", async (req, res) => {
+  if (!requireProtectedMutationAccess(req, res)) return;
+  const id = typeof req.body?.scenario === "string" ? req.body.scenario.trim() : "";
+  if (!DEMO_SCENARIO_IDS.includes(id as (typeof DEMO_SCENARIO_IDS)[number])) {
+    return res.status(400).json({ error: "Unknown scenario" });
+  }
+  try {
+    const file = join(process.cwd(), "..", "scenarios", id, "import.json");
+    const raw = JSON.parse(readFileSync(file, "utf8")) as unknown;
+    const targetLast = dayjs().subtract(1, "day").format("YYYY-MM-DD");
+    const body = alignScenarioFileDatesForDemoLoad(raw, targetLast);
+    await importPayload(body);
+    acknowledgedAlertIds.clear();
+    if (id === "freelancer-month" || id === "household-side-hustle") {
+      clearGoalShareTokens();
+      goals.splice(0, goals.length);
+      seedDemoGoalsForScenario(id);
+    }
+    res.json({ ok: true, scenario: id });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to load scenario";
+    return res.status(500).json({ error: message });
+  }
 });
 
 app.post("/api/demo/seed", async (req, res) => {
@@ -1021,6 +1430,7 @@ app.post("/api/demo/seed", async (req, res) => {
       },
     ],
   });
+  await refreshBudgetsFromRules();
   res.json({ ok: true });
 });
 
@@ -1050,6 +1460,7 @@ app.post("/api/generate-test-data", async (req, res) => {
     rules: [],
     categories,
   });
+  await refreshBudgetsFromRules();
   res.json({ generated: generated.length });
 });
 

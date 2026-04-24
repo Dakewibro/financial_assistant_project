@@ -1,0 +1,18 @@
+{
+  "transactions": [
+    {
+      "date": "2026-11-01",
+      "amount": 55,
+      "merchant": "PayMe P2P — dinner split",
+      "category": "Food",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-11-02",
+      "amount": 120,
+      "payee": "Octopus auto-load",
+      "category": "Transport",
+      "scope": "personal"
+    }
+  ]
+}

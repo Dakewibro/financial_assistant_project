@@ -1,0 +1,13 @@
+{
+  "transactions": [
+    {
+      "date": "2026-03-10",
+      "amount": -25,
+      "category": "Food",
+      "description": "Refund entered wrong sign",
+      "scope": "personal"
+    }
+  ],
+  "rules": [],
+  "categories": []
+}

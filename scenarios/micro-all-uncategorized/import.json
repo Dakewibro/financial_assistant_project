@@ -1,0 +1,48 @@
+{
+  "transactions": [
+    {
+      "date": "2026-03-01",
+      "amount": 12,
+      "category": "Uncategorized",
+      "description": "Misc A",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-03-02",
+      "amount": 9,
+      "category": "Uncategorized",
+      "description": "Misc B",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-03-03",
+      "amount": 14,
+      "category": "Uncategorized",
+      "description": "Misc C",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-03-04",
+      "amount": 11,
+      "category": "Uncategorized",
+      "description": "Misc D",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-03-05",
+      "amount": 10,
+      "category": "Uncategorized",
+      "description": "Misc E",
+      "scope": "personal"
+    }
+  ],
+  "rules": [
+    {
+      "ruleType": "uncategorized_warning",
+      "period": "monthly",
+      "threshold": 2,
+      "enabled": true
+    }
+  ],
+  "categories": []
+}

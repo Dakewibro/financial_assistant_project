@@ -1,0 +1,39 @@
+{
+  "transactions": [
+    {
+      "date": "2026-06-01",
+      "amount": 10,
+      "description": "Valid row one",
+      "category": "Food",
+      "scope": "personal"
+    },
+    {
+      "date": "not-a-date",
+      "amount": 5,
+      "description": "Bad date field",
+      "category": "Food",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-06-02",
+      "amount": -5,
+      "description": "Negative amount",
+      "category": "Food",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-06-01",
+      "amount": 10,
+      "description": "Valid row one",
+      "category": "Food",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-06-03",
+      "amount": 88,
+      "description": "Valid row two",
+      "category": "Transport",
+      "scope": "personal"
+    }
+  ]
+}

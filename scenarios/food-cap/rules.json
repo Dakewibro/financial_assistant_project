@@ -1,3 +1,9 @@
 [
-  { "ruleType": "category_cap", "category": "Meals", "period": "daily", "threshold": 50, "enabled": true }
+  {
+    "ruleType": "category_cap",
+    "category": "Food",
+    "period": "daily",
+    "threshold": 50,
+    "enabled": true
+  }
 ]

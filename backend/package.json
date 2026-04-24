@@ -8,6 +8,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "test": "vitest run",
+    "test:scenarios": "vitest run tests/scenarioGolden.test.ts",
     "test:watch": "vitest"
   },
   "keywords": [],
@@ -24,6 +25,7 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.3.3",
+    "papaparse": "^5.5.3",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -31,6 +33,7 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.5.0",
+    "@types/papaparse": "^5.5.2",
     "@types/supertest": "^7.2.0",
     "supertest": "^7.2.2",
     "tsx": "^4.21.0",

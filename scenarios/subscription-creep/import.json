@@ -1,0 +1,32 @@
+{
+  "transactions": [
+    { "date": "2026-03-01", "amount": 88, "category": "Subscription", "description": "Streaming A", "scope": "personal" },
+    { "date": "2026-03-02", "amount": 120, "category": "Subscription", "description": "Cloud storage", "scope": "personal" },
+    { "date": "2026-03-03", "amount": 45, "category": "Subscription", "description": "Music plan", "scope": "personal" },
+    { "date": "2026-03-04", "amount": 72, "category": "Subscription", "description": "VPN + security", "scope": "personal" },
+    { "date": "2026-03-05", "amount": 65, "category": "Subscription", "description": "News bundle", "scope": "personal" },
+    { "date": "2026-03-06", "amount": 54, "category": "Subscription", "description": "Fitness app", "scope": "personal" },
+    { "date": "2026-03-07", "amount": 38, "category": "Subscription", "description": "Photo backup", "scope": "personal" },
+    { "date": "2026-03-08", "amount": 29, "category": "Food", "description": "Brunch", "scope": "personal" },
+    { "date": "2026-03-09", "amount": 90, "category": "Food", "description": "Team dinner", "scope": "personal" },
+    { "date": "2026-03-10", "amount": 41, "category": "Food", "description": "Lunch meeting", "scope": "personal" },
+    { "date": "2026-03-11", "amount": 33, "category": "Food", "description": "Cafe work", "scope": "personal" },
+    { "date": "2026-03-12", "amount": 27, "category": "Food", "description": "Quick bite", "scope": "personal" }
+  ],
+  "rules": [
+    {
+      "ruleType": "category_percentage",
+      "category": "Subscription",
+      "period": "monthly",
+      "threshold": 25,
+      "enabled": true
+    },
+    {
+      "ruleType": "period_cap",
+      "period": "monthly",
+      "threshold": 500,
+      "enabled": true
+    }
+  ],
+  "categories": []
+}

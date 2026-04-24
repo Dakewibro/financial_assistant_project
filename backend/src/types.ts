@@ -32,7 +32,8 @@ export type RuleType =
   | "category_percentage"
   | "consecutive_overspend"
   | "uncategorized_warning"
-  | "recurring_threshold";
+  | "recurring_threshold"
+  | "duplicate_amount";
 
 export interface BudgetRule {
   id: string;

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Search, Plus, Filter, Trash2, X } from "lucide-react";
 import api, { formatApiError } from "../lib/api";
+import { normalizeTransactionList } from "../lib/transactionShape";
 import { HKD, shortDate, fullDate } from "../lib/format";
 import { Card, EmptyState, ErrorBanner, Page, PageHeader, Skel, Chip } from "../components/Shared";
 import { Input } from "../components/ui/input";
@@ -35,7 +36,7 @@ export default function Transactions() {
     if (catFilter !== "all") params.append("category", catFilter);
     try {
       const { data } = await api.get(`/transactions?${params.toString()}`);
-      setTxns(data);
+      setTxns(normalizeTransactionList(data));
     } catch (e) { setErr(formatApiError(e)); }
     finally { setLoading(false); }
   };
@@ -124,10 +125,13 @@ export default function Transactions() {
               <button key={t.id} onClick={() => setSelected(t)} data-testid={`txn-row-${t.id}`}
                 className="w-full flex items-center gap-3 px-4 py-3 hover:bg-sand-100 transition-colors text-left">
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-medium ${t.type === "income" ? "bg-moss-soft text-moss" : "bg-sand-100"}`}>
-                  {t.merchant.slice(0, 1).toUpperCase()}
+                  {String(t.merchant || "?")
+                    .trim()
+                    .slice(0, 1)
+                    .toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium truncate">{t.merchant}</div>
+                  <div className="text-sm font-medium truncate">{t.merchant || "—"}</div>
                   <div className="text-[11px] text-[color:var(--text-secondary)] mt-0.5">
                     {shortDate(t.date)} · {t.category} · <span className="capitalize">{t.account}</span>
                   </div>

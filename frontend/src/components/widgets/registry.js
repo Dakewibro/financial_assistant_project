@@ -250,10 +250,13 @@ export function Recent({ size, data }) {
           {txns.slice(0, max).map(t => (
             <div key={t.id} className="flex items-center gap-2.5" data-testid={`recent-${t.id}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-medium ${t.type === "income" ? "bg-moss-soft text-moss" : "bg-sand-100"}`}>
-                {t.merchant.slice(0, 1).toUpperCase()}
+                {String(t.merchant || "?")
+                  .trim()
+                  .slice(0, 1)
+                  .toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-xs truncate font-medium">{t.merchant}</div>
+                <div className="text-xs truncate font-medium">{t.merchant || "—"}</div>
                 {size !== "s" && <div className="text-[10px] text-[color:var(--text-secondary)]">{shortDate(t.date)} · {t.category}</div>}
               </div>
               <div className={`text-xs font-num tabular-nums ${t.type === "income" ? "text-moss" : ""}`}>
@@ -341,3 +344,6 @@ export const DEFAULT_LAYOUT = [
 ];
 
 export const SIZE_TO_COLS = { s: 1, m: 2, l: 3 };
+
+/** Min height for the dashed placeholder while dragging (keeps grid calm). */
+export const SIZE_TO_PLACEHOLDER_MIN_PX = { s: 132, m: 176, l: 248 };

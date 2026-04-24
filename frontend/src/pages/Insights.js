@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { BarChart3, TrendingUp, TrendingDown, AlertTriangle, Lightbulb, CheckCircle2, ArrowUpRight } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell, PieChart, Pie } from "recharts";
@@ -25,6 +25,17 @@ export default function Insights() {
   };
   useEffect(() => { load(); }, []);
 
+  const hasLedgerInsights = (payload) => {
+    if (!payload || typeof payload !== "object") return false;
+    const total = payload.total_transactions ?? payload.txn_count_this_month;
+    if (typeof total === "number" && total > 0) return true;
+    const cats = payload.by_category;
+    if (Array.isArray(cats) && cats.some((x) => x && Number(x.amount) > 0)) return true;
+    const series = payload.daily_series;
+    if (Array.isArray(series) && series.some((x) => x && Number(x.amount) > 0)) return true;
+    return false;
+  };
+
   return (
     <Page>
       <PageHeader title="Insights" subtitle="The one change that matters — and the detail behind it." />
@@ -33,32 +44,63 @@ export default function Insights() {
 
       {loading ? (
         <div className="space-y-4"><Skel className="h-40" /><div className="grid md:grid-cols-3 gap-4"><Skel className="h-28" /><Skel className="h-28" /><Skel className="h-28" /></div><Skel className="h-72" /></div>
-      ) : !ins || ins.txn_count_this_month === 0 ? (
+      ) : err ? null : !ins || !hasLedgerInsights(ins) ? (
         <Card className="p-2"><EmptyState icon={BarChart3} title="Not enough data yet"
           body="Add a few transactions to unlock trends, category splits, and forward-looking safe-to-spend." testid="insights-empty" /></Card>
       ) : (
+        <InsightsBody ins={ins} headline={headline} />
+      )}
+    </Page>
+  );
+}
+
+function InsightsBody({ ins, headline }) {
+  const series = ins.daily_series || [];
+  const daysWithSpend = useMemo(() => series.filter((d) => Number(d.amount) > 0).length, [series]);
+  const showLineDots = daysWithSpend <= 28;
+
+  return (
         <div className="space-y-6">
           {/* Headline first — what matters most */}
           {headline?.headline && <HeadlineSection headline={headline.headline} drill={headline.drill_down} action={headline.action} />}
 
           {/* KPI summary */}
           <div className="grid md:grid-cols-3 gap-4">
-            <KPI label="Income (this month)" value={HKD(ins.income_this_month)} />
-            <KPI label="Expenses (this month)" value={HKD(ins.expense_this_month)} tone="terra" />
-            <KPI label="vs last month" value={`${ins.mom_pct > 0 ? "+" : ""}${ins.mom_pct.toFixed(0)}%`}
-              tone={ins.mom_pct > 10 ? "terra" : "moss"}
-              icon={ins.mom_pct > 0 ? TrendingUp : TrendingDown} />
+            <KPI label="Income (this month)" value={HKD(ins.income_this_month ?? 0)} />
+            <KPI label="Expenses (this month)" value={HKD(ins.expense_this_month ?? 0)} tone="terra" />
+            <KPI label="vs last month" value={`${(ins.mom_pct ?? 0) > 0 ? "+" : ""}${Number(ins.mom_pct ?? 0).toFixed(0)}%`}
+              tone={(ins.mom_pct ?? 0) > 10 ? "terra" : "moss"}
+              icon={(ins.mom_pct ?? 0) > 0 ? TrendingUp : TrendingDown} />
           </div>
 
           <Card className="p-5">
             <div className="font-heading font-medium">30-day spending</div>
             <div className="mt-4" style={{ minHeight: 240, height: 240, width: "100%" }} data-testid="daily-chart">
               <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={240}>
-                <LineChart data={ins.daily_series} margin={{ top: 8, right: 8, bottom: 0, left: -8 }}>
-                  <XAxis dataKey="date" tickFormatter={dayShort} interval={4} stroke="#9CA3AF" fontSize={11} />
-                  <YAxis stroke="#9CA3AF" fontSize={11} />
+                <LineChart data={series} margin={{ top: 8, right: 8, bottom: 8, left: -8 }}>
+                  <XAxis type="category" dataKey="date" tickFormatter={dayShort} interval="preserveStartEnd" minTickGap={16} stroke="#9CA3AF" fontSize={11} />
+                  <YAxis stroke="#9CA3AF" fontSize={11} width={48} tickFormatter={(v) => (Number(v) >= 1000 ? `${Math.round(v / 1000)}k` : v)} />
                   <Tooltip formatter={(v) => HKD(v)} labelFormatter={dayShort} contentStyle={{ border: "1px solid #E5E3DB", borderRadius: 8, fontSize: 12 }} />
-                  <Line type="monotone" dataKey="amount" stroke="#2D5A27" strokeWidth={2} dot={false} />
+                  <Line
+                    type="monotone"
+                    dataKey="amount"
+                    stroke="#2D5A27"
+                    strokeWidth={2}
+                    connectNulls
+                    isAnimationActive={false}
+                    dot={
+                      showLineDots
+                        ? (props) => {
+                            const amt = Number(props.payload?.amount);
+                            if (!amt || amt <= 0) return null;
+                            const { cx, cy } = props;
+                            if (cx == null || cy == null) return null;
+                            return <circle cx={cx} cy={cy} r={3.5} fill="#2D5A27" stroke="#fff" strokeWidth={1} />;
+                          }
+                        : false
+                    }
+                    activeDot={{ r: 6, stroke: "#2D5A27", strokeWidth: 2, fill: "#fff" }}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -69,12 +111,12 @@ export default function Insights() {
               <div className="font-heading font-medium">By category</div>
               <div className="mt-4" style={{ minHeight: 288, height: 288, width: "100%" }} data-testid="category-chart">
                 <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={288}>
-                  <BarChart data={ins.by_category.slice(0, 8)} layout="vertical" margin={{ left: 20, right: 20 }}>
+                  <BarChart data={(ins.by_category || []).slice(0, 8)} layout="vertical" margin={{ left: 20, right: 20 }}>
                     <XAxis type="number" stroke="#9CA3AF" fontSize={11} />
                     <YAxis dataKey="category" type="category" stroke="#6B6B6B" fontSize={11} width={110} />
                     <Tooltip formatter={(v) => HKD(v)} contentStyle={{ border: "1px solid #E5E3DB", borderRadius: 8, fontSize: 12 }} />
                     <Bar dataKey="amount" radius={[0, 4, 4, 0]}>
-                      {ins.by_category.slice(0, 8).map((_, i) => <Cell key={i} fill={PALETTE[i % PALETTE.length]} />)}
+                      {(ins.by_category || []).slice(0, 8).map((_, i) => <Cell key={i} fill={PALETTE[i % PALETTE.length]} />)}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -83,7 +125,7 @@ export default function Insights() {
 
             <Card className="p-5">
               <div className="font-heading font-medium">Personal vs Business</div>
-              {ins.by_account.length === 0 ? (
+              {(!Array.isArray(ins.by_account) || ins.by_account.length === 0) ? (
                 <div className="py-12 text-center text-sm text-[color:var(--text-secondary)]">No data yet.</div>
               ) : (
                 <div className="mt-4 flex items-center" style={{ minHeight: 288, height: 288 }} data-testid="account-chart">
@@ -112,12 +154,11 @@ export default function Insights() {
             </Card>
           </div>
         </div>
-      )}
-    </Page>
   );
 }
 
 function HeadlineSection({ headline, drill, action }) {
+  if (!headline || typeof headline !== "object") return null;
   const toneMap = {
     warning: { bg: "bg-terracotta-soft", border: "border-terracotta/25", text: "text-terracotta", icon: AlertTriangle, bar: "bg-terracotta" },
     info: { bg: "bg-[#E6EEF3]", border: "border-[#4A6E82]/25", text: "text-[#4A6E82]", icon: Lightbulb, bar: "bg-[#4A6E82]" },
@@ -153,8 +194,8 @@ function HeadlineSection({ headline, drill, action }) {
           <div className="text-[11px] uppercase tracking-[0.2em] text-[color:var(--text-secondary)] mb-3">What drove it</div>
           <div className="bg-white rounded-lg border border-sand-200 p-4 space-y-2.5">
             {drill.map((d, i) => {
-              const max = Math.max(...drill.map(x => x.amount));
-              const pct = (d.amount / max) * 100;
+              const max = Math.max(0, ...drill.map((x) => Number(x.amount) || 0));
+              const pct = max > 0 ? (Number(d.amount) / max) * 100 : 0;
               return (
                 <div key={i} className="flex items-center gap-3" data-testid={`insights-drill-${i}`}>
                   <div className="w-32 sm:w-44 text-xs truncate font-medium">{d.merchant}</div>

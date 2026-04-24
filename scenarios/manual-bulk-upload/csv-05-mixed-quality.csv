@@ -1,0 +1,8 @@
+date,amount,description,category,scope
+2026-03-01,55.00,Same cafe twice row A,Food,personal
+2026-03-01,55.00,Same cafe twice row A,Food,personal
+2026-03-02,120.00,,Food,personal
+2026-03-03,not-a-number,Should fail amount,Transport,personal
+2026-03-04,50.00,OK after messy rows,Food,personal
+2026-13-40,10.00,Bad calendar date,Bills,personal
+2026-03-06,0,Zero amount invalid,Food,personal

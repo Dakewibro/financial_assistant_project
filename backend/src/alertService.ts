@@ -185,6 +185,30 @@ export function evaluateAlerts(transactions: Transaction[], rules: BudgetRule[],
     }
   }
 
+  const duplicateWindow = dayjs().subtract(45, "day");
+  const recentForDup = transactions.filter((tx) => !dayjs(tx.date).isBefore(duplicateWindow, "day"));
+  const dupGroups = new Map<string, Transaction[]>();
+  for (const tx of recentForDup) {
+    const key = `${tx.normalizedMerchant}::${Number(tx.amount).toFixed(2)}`;
+    const list = dupGroups.get(key) ?? [];
+    list.push(tx);
+    dupGroups.set(key, list);
+  }
+  for (const list of dupGroups.values()) {
+    if (list.length < 3) continue;
+    const sample = list[0];
+    const severity: Alert["severity"] = list.length >= 5 ? "critical" : "warning";
+    alerts.push({
+      id: randomUUID(),
+      ruleId: "duplicate-amount",
+      ruleType: "duplicate_amount",
+      message: `Same HK$${sample.amount.toFixed(2)} charge ${list.length} times (${sample.description})`,
+      evidence: `${list.length} matching transactions in the last 45 days`,
+      severity,
+      status: "detected",
+    });
+  }
+
   const severityRank: Record<Alert["severity"], number> = {
     critical: 3,
     warning: 2,

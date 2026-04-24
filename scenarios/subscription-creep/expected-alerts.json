@@ -1,3 +1,12 @@
 [
-  { "ruleType": "category_percentage", "message": "Subscription share is too high" }
+  {
+    "ruleType": "period_cap",
+    "message": "monthly spending cap exceeded",
+    "evidence": "HK$702.00 of HK$500.00"
+  },
+  {
+    "ruleType": "category_percentage",
+    "message": "Subscription share is too high",
+    "evidence": "68.7% of monthly spending"
+  }
 ]

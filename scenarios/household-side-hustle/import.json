@@ -1,0 +1,59 @@
+{
+  "transactions": [
+    { "date": "2026-03-01", "amount": 420, "category": "Bills", "description": "Home rent share", "scope": "personal" },
+    { "date": "2026-03-02", "amount": 500, "category": "Transport", "description": "Octopus auto-load", "scope": "personal" },
+    { "date": "2026-03-03", "amount": 880, "category": "Business Expense", "description": "AWS Hong Kong", "scope": "business" },
+    { "date": "2026-03-04", "amount": 318, "category": "Business Expense", "description": "Zoom Pro HK", "scope": "business" },
+    { "date": "2026-03-05", "amount": 76, "category": "Food", "description": "Wet market groceries", "scope": "personal" },
+    { "date": "2026-03-06", "amount": 195, "category": "Business Expense", "description": "Client lunch IFC", "scope": "business" },
+    { "date": "2026-03-07", "amount": 128, "category": "Food", "description": "Family dim sum", "scope": "personal" },
+    { "date": "2026-03-08", "amount": 54, "category": "Transport", "description": "Green minibus", "scope": "personal" },
+    { "date": "2026-03-09", "amount": 500, "category": "Transport", "description": "Octopus auto-load", "scope": "personal" },
+    { "date": "2026-03-10", "amount": 62, "category": "Food", "description": "School lunch boxes", "scope": "personal" },
+    { "date": "2026-03-11", "amount": 319, "category": "Business Expense", "description": "Zoom Pro HK", "scope": "business" },
+    { "date": "2026-03-12", "amount": 196, "category": "Business Expense", "description": "Client lunch IFC", "scope": "business" },
+    { "date": "2026-03-13", "amount": 88, "category": "Shopping", "description": "Household supplies Mannings", "scope": "personal" },
+    { "date": "2026-03-14", "amount": 340, "category": "Bills", "description": "Electric CLP estimate", "scope": "personal" },
+    { "date": "2026-03-15", "amount": 72, "category": "Food", "description": "ParknShop weekly shop", "scope": "personal" },
+    { "date": "2026-03-16", "amount": 500, "category": "Transport", "description": "Octopus auto-load", "scope": "personal" },
+    { "date": "2026-03-17", "amount": 880, "category": "Business Expense", "description": "AWS Hong Kong", "scope": "business" },
+    { "date": "2026-03-18", "amount": 317, "category": "Business Expense", "description": "Zoom Pro HK", "scope": "business" },
+    { "date": "2026-03-19", "amount": 44, "category": "Uncategorized", "description": "Coin laundry", "scope": "personal" },
+    { "date": "2026-03-20", "amount": 194, "category": "Business Expense", "description": "Client lunch IFC", "scope": "business" },
+    { "date": "2026-03-21", "amount": 168, "category": "Food", "description": "Hotpot family", "scope": "personal" },
+    { "date": "2026-03-22", "amount": 39, "category": "Transport", "description": "Bus KMB", "scope": "personal" },
+    { "date": "2026-03-23", "amount": 500, "category": "Transport", "description": "Octopus auto-load", "scope": "personal" },
+    { "date": "2026-03-24", "amount": 265, "category": "Business Expense", "description": "Adobe Stock business", "scope": "business" },
+    { "date": "2026-03-25", "amount": 318, "category": "Business Expense", "description": "Zoom Pro HK", "scope": "business" },
+    { "date": "2026-03-26", "amount": 91, "category": "Food", "description": "Bakery buns", "scope": "personal" },
+    { "date": "2026-03-27", "amount": 195, "category": "Business Expense", "description": "Client lunch IFC", "scope": "business" },
+    { "date": "2026-03-28", "amount": 112, "category": "Food", "description": "BBQ supplies", "scope": "personal" },
+    { "date": "2026-03-29", "amount": 48, "category": "Food", "description": "Sunday breakfast", "scope": "personal" },
+    { "date": "2026-03-29", "amount": 125, "category": "Food", "description": "Sunday roast ingredients", "scope": "personal" },
+    { "date": "2026-03-29", "amount": 38, "category": "Food", "description": "Dessert run", "scope": "personal" }
+  ],
+  "rules": [
+    {
+      "ruleType": "period_cap",
+      "period": "monthly",
+      "threshold": 7500,
+      "enabled": true
+    },
+    {
+      "ruleType": "category_percentage",
+      "category": "Business Expense",
+      "period": "monthly",
+      "threshold": 26,
+      "enabled": true
+    },
+    {
+      "ruleType": "category_cap",
+      "category": "Transport",
+      "period": "monthly",
+      "threshold": 1650,
+      "scope": "personal",
+      "enabled": true
+    }
+  ],
+  "categories": []
+}

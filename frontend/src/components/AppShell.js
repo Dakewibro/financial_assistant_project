@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Receipt, Target, Bell, Repeat2, BarChart3, Settings as SettingsIcon, Plus, LogOut, Menu, X, Flag } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import api from "../lib/api";
+import { FA_INVALIDATE_ALERT_COUNT } from "../lib/appEvents";
 import QuickAddDialog from "./QuickAddDialog";
 
 const NAV = [
@@ -33,7 +34,15 @@ export default function AppShell({ children }) {
     };
     fetchAlerts();
     const i = setInterval(fetchAlerts, 30000);
-    return () => { mounted = false; clearInterval(i); };
+    const onInvalidate = () => {
+      void fetchAlerts();
+    };
+    window.addEventListener(FA_INVALIDATE_ALERT_COUNT, onInvalidate);
+    return () => {
+      mounted = false;
+      clearInterval(i);
+      window.removeEventListener(FA_INVALIDATE_ALERT_COUNT, onInvalidate);
+    };
   }, []);
 
   // Global keyboard shortcut: press N (not while typing) → open Quick Add

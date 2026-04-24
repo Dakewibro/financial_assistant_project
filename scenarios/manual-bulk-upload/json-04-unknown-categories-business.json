@@ -1,0 +1,25 @@
+{
+  "transactions": [
+    {
+      "date": "2026-09-01",
+      "amount": 450,
+      "category": "GymPopUp ClassPass",
+      "description": "Pop-up HIIT studio Central",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-09-02",
+      "amount": 1200,
+      "category": "Client lunch reclaim",
+      "description": "Hotel ICON client meeting",
+      "scope": "business"
+    },
+    {
+      "date": "2026-09-03",
+      "amount": 35,
+      "category": "Food",
+      "description": "Staff canteen",
+      "scope": "business"
+    }
+  ]
+}

@@ -1,4 +1,17 @@
 [
-  { "ruleType": "period_cap", "message": "monthly spending cap exceeded" },
-  { "ruleType": "category_percentage", "message": "Transport share is too high" }
+  {
+    "ruleType": "period_cap",
+    "message": "monthly spending cap exceeded",
+    "evidence": "HK$1207.00 of HK$300.00"
+  },
+  {
+    "ruleType": "category_cap",
+    "message": "Transport monthly cap exceeded",
+    "evidence": "HK$1002.00 of HK$950.00"
+  },
+  {
+    "ruleType": "category_percentage",
+    "message": "Transport share is too high",
+    "evidence": "83.0% of monthly spending"
+  }
 ]

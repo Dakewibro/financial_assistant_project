@@ -1,0 +1,19 @@
+{
+  "transactions": [],
+  "rules": [
+    {
+      "ruleType": "period_cap",
+      "period": "monthly",
+      "threshold": 500,
+      "enabled": true
+    },
+    {
+      "ruleType": "category_cap",
+      "category": "Food",
+      "period": "daily",
+      "threshold": 50,
+      "enabled": true
+    }
+  ],
+  "categories": []
+}

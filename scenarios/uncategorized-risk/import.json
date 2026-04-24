@@ -1,0 +1,34 @@
+{
+  "transactions": [
+    {
+      "date": "2026-03-05",
+      "amount": 25,
+      "category": "Uncategorized",
+      "description": "Cash payment",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-03-06",
+      "amount": 20,
+      "category": "Uncategorized",
+      "description": "Snacks",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-03-06",
+      "amount": 16,
+      "category": "Uncategorized",
+      "description": "Stationery",
+      "scope": "personal"
+    }
+  ],
+  "rules": [
+    {
+      "ruleType": "uncategorized_warning",
+      "period": "monthly",
+      "threshold": 2,
+      "enabled": true
+    }
+  ],
+  "categories": []
+}

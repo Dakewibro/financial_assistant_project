@@ -16,6 +16,12 @@ api.interceptors.request.use((config) => {
 });
 
 export function formatApiError(err) {
+  if (err?.code === "ERR_NETWORK" || err?.message === "Network Error") {
+    const base = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? "http://localhost:4000" : "");
+    return base
+      ? `Cannot reach API (${base}). Check the backend is running and VITE_BACKEND_URL if you use a custom port.`
+      : "Cannot reach API (same-origin /api). Set VITE_BACKEND_URL for local dev or use the Vite proxy.";
+  }
   const detail = err?.response?.data?.detail;
   if (detail == null) {
     const errMsg = err?.response?.data?.error;

@@ -1,8 +1,8 @@
 {
-  "totalSpending": 340,
-  "perCategoryTotals": { "Transport": 290, "Meals": 50 },
+  "totalSpending": 1207,
+  "perCategoryTotals": { "Transport": 1002, "Food": 205 },
   "top3Categories": [
-    { "category": "Transport", "amount": 290 },
-    { "category": "Meals", "amount": 50 }
+    { "category": "Transport", "amount": 1002 },
+    { "category": "Food", "amount": 205 }
   ]
 }

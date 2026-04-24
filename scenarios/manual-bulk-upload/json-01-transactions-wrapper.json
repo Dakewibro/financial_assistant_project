@@ -1,0 +1,25 @@
+{
+  "transactions": [
+    {
+      "date": "2026-07-01",
+      "amount": 38.5,
+      "category": "Food",
+      "description": "Fairwood takeaway",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-07-02",
+      "amount": 22,
+      "category": "Transport",
+      "description": "Green minibus Happy Valley",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-07-03",
+      "amount": 199.9,
+      "category": "Shopping",
+      "description": "Logitech mouse — Fortress",
+      "scope": "personal"
+    }
+  ]
+}

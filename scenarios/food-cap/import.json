@@ -1,0 +1,49 @@
+{
+  "transactions": [
+    { "date": "2026-03-15", "amount": 18, "category": "Food", "description": "Bakery", "scope": "personal" },
+    { "date": "2026-03-16", "amount": 22, "category": "Food", "description": "Quick lunch", "scope": "personal" },
+    { "date": "2026-03-17", "amount": 14, "category": "Transport", "description": "Minibus", "scope": "personal" },
+    { "date": "2026-03-18", "amount": 26, "category": "Food", "description": "Noodle shop", "scope": "personal" },
+    { "date": "2026-03-19", "amount": 19, "category": "Food", "description": "Coffee", "scope": "personal" },
+    { "date": "2026-03-20", "amount": 31, "category": "Food", "description": "Supermarket bits", "scope": "personal" },
+    { "date": "2026-03-21", "amount": 24, "category": "Food", "description": "Sunday brunch", "scope": "personal" },
+    { "date": "2026-03-22", "amount": 16, "category": "Transport", "description": "Ferry", "scope": "personal" },
+    { "date": "2026-03-23", "amount": 28, "category": "Food", "description": "Work lunch", "scope": "personal" },
+    { "date": "2026-03-24", "amount": 21, "category": "Food", "description": "Salad bar", "scope": "personal" },
+    { "date": "2026-03-25", "amount": 17, "category": "Food", "description": "Tea set", "scope": "personal" },
+    { "date": "2026-03-26", "amount": 29, "category": "Food", "description": "Takeaway", "scope": "personal" },
+    { "date": "2026-03-27", "amount": 23, "category": "Food", "description": "Late snack", "scope": "personal" },
+    { "date": "2026-03-28", "amount": 20, "category": "Transport", "description": "Octopus top-up", "scope": "personal" },
+    {
+      "date": "2026-03-29",
+      "amount": 35,
+      "category": "Food",
+      "description": "Breakfast + lunch",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-03-29",
+      "amount": 30,
+      "category": "Food",
+      "description": "Dinner",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-03-29",
+      "amount": 15,
+      "category": "Transport",
+      "description": "Bus",
+      "scope": "personal"
+    }
+  ],
+  "rules": [
+    {
+      "ruleType": "category_cap",
+      "category": "Food",
+      "period": "daily",
+      "threshold": 50,
+      "enabled": true
+    }
+  ],
+  "categories": []
+}

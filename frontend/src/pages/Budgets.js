@@ -31,7 +31,8 @@ export default function Budgets() {
     try {
       const [b, c, p] = await Promise.all([api.get("/budgets"), api.get("/categories"), api.get("/insights/pacing")]);
       setItems(b.data);
-      setCategories(c.data.categories || []);
+      const catPayload = c.data;
+      setCategories(Array.isArray(catPayload) ? catPayload : catPayload?.categories || []);
       const m = {};
       (p.data.budgets || []).forEach(x => { m[x.budget_id] = x; });
       setPacing({ month_pct: p.data.month_pct, rows: m });
@@ -105,7 +106,9 @@ export default function Budgets() {
                       {isShared && <span className="text-[9px] uppercase tracking-[0.15em] text-moss bg-moss-soft px-1.5 py-0.5 rounded flex items-center gap-1"><Users size={9} /> Shared</span>}
                       {!isOwner && <span className="text-[9px] uppercase tracking-[0.15em] text-[color:var(--text-secondary)] bg-sand-100 px-1.5 py-0.5 rounded">Member</span>}
                     </div>
-                    <div className="text-[11px] text-[color:var(--text-secondary)] mt-0.5 capitalize">{b.category} · {b.account}</div>
+                    <div className="text-[11px] text-[color:var(--text-secondary)] mt-0.5 capitalize">
+                      {b.category === "__period__" ? "All spending" : b.category} · {b.account}
+                    </div>
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <span className={`text-[10px] font-medium px-2 py-0.5 rounded ${paceBg}`} data-testid={`pace-${b.id}`}>{PACE_LABEL[paceStatus]}</span>

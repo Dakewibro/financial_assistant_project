@@ -1,0 +1,18 @@
+{
+  "transactions": [
+    {
+      "date": "2026-01-15",
+      "amount": 120.5,
+      "category": "Food",
+      "description": "Starbucks Central",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-01-16",
+      "amount": 45,
+      "category": "Transport",
+      "description": "MTR Admiralty",
+      "scope": "personal"
+    }
+  ]
+}

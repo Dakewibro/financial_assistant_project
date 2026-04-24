@@ -1,0 +1,8 @@
+{
+  "totalSpending": 237,
+  "perCategoryTotals": { "Food": 200, "Uncategorized": 37 },
+  "top3Categories": [
+    { "category": "Food", "amount": 200 },
+    { "category": "Uncategorized", "amount": 37 }
+  ]
+}

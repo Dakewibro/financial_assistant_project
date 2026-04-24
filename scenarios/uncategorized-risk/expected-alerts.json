@@ -1,3 +1,7 @@
 [
-  { "ruleType": "uncategorized_warning", "message": "Too many uncategorized entries" }
+  {
+    "ruleType": "uncategorized_warning",
+    "message": "Too many uncategorized entries",
+    "evidence": "3 uncategorized transactions this monthly"
+  }
 ]

@@ -1,0 +1,13 @@
+{
+  "transactions": [
+    {
+      "date": "2026-03-10",
+      "amount": 120,
+      "category": "GymPopUpClass",
+      "description": "One-off studio pass",
+      "scope": "personal"
+    }
+  ],
+  "rules": [],
+  "categories": []
+}

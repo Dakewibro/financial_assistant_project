@@ -1,7 +1,7 @@
 [
   {
     "ruleType": "category_cap",
-    "message": "Meals daily cap exceeded",
-    "evidence": "65 > 50 today"
+    "message": "Food daily cap exceeded",
+    "evidence": "HK$65.00 of HK$50.00"
   }
 ]

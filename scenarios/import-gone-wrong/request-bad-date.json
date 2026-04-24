@@ -1,0 +1,13 @@
+{
+  "transactions": [
+    {
+      "date": "31-03-2026",
+      "amount": 10,
+      "category": "Food",
+      "description": "Invalid calendar day",
+      "scope": "personal"
+    }
+  ],
+  "rules": [],
+  "categories": []
+}

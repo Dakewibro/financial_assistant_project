@@ -1,8 +1,8 @@
 {
-  "totalSpending": 343,
-  "perCategoryTotals": { "Subscription": 253, "Meals": 90 },
+  "totalSpending": 702,
+  "perCategoryTotals": { "Subscription": 482, "Food": 220 },
   "top3Categories": [
-    { "category": "Subscription", "amount": 253 },
-    { "category": "Meals", "amount": 90 }
+    { "category": "Subscription", "amount": 482 },
+    { "category": "Food", "amount": 220 }
   ]
 }

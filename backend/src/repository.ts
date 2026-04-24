@@ -5,6 +5,7 @@ import { CategoryModel } from "./models/Category.js";
 import { TransactionModel } from "./models/Transaction.js";
 import { DEFAULT_CATEGORIES, type BudgetRule, type Scope, type Transaction, type TransactionFilters } from "./types.js";
 import { escapeRegex } from "./utils/escapeRegex.js";
+import { normalizeMerchant } from "./utils/normalizeMerchant.js";
 
 interface MemoryStore {
   transactions: Transaction[];
@@ -173,6 +174,49 @@ export async function listTransactions(filters: Omit<TransactionFilters, "recurr
   return docs.map((doc) => mapTransactionDocument(doc));
 }
 
+export async function countTransactions(): Promise<number> {
+  const env = getEnv();
+  if (env.storageMode === "memory") return memoryStore.transactions.length;
+  return TransactionModel.countDocuments();
+}
+
+export async function appendTransactions(
+  inputs: Array<Omit<Transaction, "id" | "createdAt" | "updatedAt"> & { normalizedMerchant?: string }>,
+): Promise<Transaction[]> {
+  const env = getEnv();
+  const now = new Date().toISOString();
+  const normalized = inputs.map((input) => ({
+    ...input,
+    normalizedMerchant: input.normalizedMerchant ?? normalizeMerchant(input.description),
+  }));
+
+  if (env.storageMode === "memory") {
+    const created: Transaction[] = normalized.map((input) => ({
+      id: randomUUID(),
+      ...input,
+      createdAt: now,
+      updatedAt: now,
+    }));
+    memoryStore.transactions.unshift(...created);
+    return created;
+  }
+
+  if (normalized.length === 0) return [];
+
+  const docs = await TransactionModel.insertMany(
+    normalized.map((tx) => ({
+      date: tx.date,
+      amount: tx.amount,
+      category: tx.category,
+      description: tx.description,
+      normalizedMerchant: tx.normalizedMerchant,
+      scope: tx.scope,
+      notes: tx.notes,
+    })),
+  );
+  return docs.map((doc) => mapTransactionDocument(doc as never));
+}
+
 export async function createTransaction(
   input: Omit<Transaction, "id" | "createdAt" | "updatedAt"> & { createdAt?: string; updatedAt?: string },
 ): Promise<Transaction> {
@@ -224,6 +268,7 @@ export async function replaceTransactions(
   if (env.storageMode === "memory") {
     memoryStore.transactions = transactions.map((tx) => ({
       ...tx,
+      normalizedMerchant: tx.normalizedMerchant ?? normalizeMerchant(tx.description),
       id: randomUUID(),
       createdAt: tx.createdAt ?? now,
       updatedAt: tx.updatedAt ?? now,
@@ -239,7 +284,7 @@ export async function replaceTransactions(
         amount: tx.amount,
         category: tx.category,
         description: tx.description,
-        normalizedMerchant: tx.normalizedMerchant,
+        normalizedMerchant: tx.normalizedMerchant ?? normalizeMerchant(tx.description),
         scope: tx.scope,
         notes: tx.notes,
         createdAt: tx.createdAt ? new Date(tx.createdAt) : undefined,
