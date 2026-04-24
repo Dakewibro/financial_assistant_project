@@ -24,6 +24,7 @@ describe("baseline smoke checks", () => {
     expect(res.body.flags).toEqual({
       emergentV2Enabled: false,
       authEnforced: false,
+      demoMutationsEnabled: true,
       v2ContractsEnabled: false,
     });
     expect(typeof res.body.requestId).toBe("string");

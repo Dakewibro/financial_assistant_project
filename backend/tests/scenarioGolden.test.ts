@@ -168,11 +168,12 @@ describe("import-gone-wrong payloads (validation)", () => {
     expect(r.error).toMatch(/Invalid transaction at index 0/);
   });
 
-  it("rejects negative amount", () => {
+  it("coerces negative amount to income with positive magnitude", () => {
     const body = loadJson("import-gone-wrong/request-negative-amount.json");
     const r = parseImportPayload(body);
-    expect(r.payload).toBeUndefined();
-    expect(r.error).toMatch(/Invalid transaction at index 0/);
+    expect(r.payload).toBeDefined();
+    expect(r.payload?.transactions[0]?.amount).toBe(25);
+    expect(r.payload?.transactions[0]?.flow).toBe("income");
   });
 
   it("rejects empty category", () => {

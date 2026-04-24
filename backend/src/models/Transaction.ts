@@ -1,9 +1,10 @@
 import { Schema, model } from "mongoose";
-import type { Scope } from "../types.js";
+import type { Scope, TxnFlow } from "../types.js";
 
 export interface TransactionRecord {
   date: string;
   amount: number;
+  flow: TxnFlow;
   category: string;
   description: string;
   normalizedMerchant: string;
@@ -17,6 +18,7 @@ const transactionSchema = new Schema<TransactionRecord>(
   {
     date: { type: String, required: true, index: true },
     amount: { type: Number, required: true, min: 0 },
+    flow: { type: String, enum: ["expense", "income"], required: true, default: "expense", index: true },
     category: { type: String, required: true, index: true },
     description: { type: String, required: true },
     normalizedMerchant: { type: String, required: true, index: true },

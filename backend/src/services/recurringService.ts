@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import type { Frequency, RecurringGroup, Transaction } from "../types.js";
+import { countsAsExpense, type Frequency, type RecurringGroup, type Transaction } from "../types.js";
 
 function detectFrequency(intervals: number[]): Frequency | null {
   if (intervals.length === 0) return null;
@@ -28,7 +28,8 @@ function getNextExpectedDate(lastDate: string, frequency: Frequency): string | u
 }
 
 export function detectRecurringGroups(transactions: Transaction[]): RecurringGroup[] {
-  const grouped = transactions.reduce<Map<string, Transaction[]>>((acc, tx) => {
+  const spending = transactions.filter(countsAsExpense);
+  const grouped = spending.reduce<Map<string, Transaction[]>>((acc, tx) => {
     const key = `${tx.scope}:${tx.normalizedMerchant}`;
     const current = acc.get(key) ?? [];
     current.push(tx);

@@ -3,7 +3,7 @@ import customParseFormat from "dayjs/plugin/customParseFormat.js";
 import Papa from "papaparse";
 import { DEFAULT_CATEGORIES, type Scope } from "../types.js";
 import { normalizeMerchant } from "../utils/normalizeMerchant.js";
-import { transactionSchema } from "../validation.js";
+import { normalizeRawTransactionForImport, transactionSchema } from "../validation.js";
 
 dayjs.extend(customParseFormat);
 
@@ -25,6 +25,7 @@ export type BulkPreviewRow = {
   transaction: null | {
     date: string;
     amount: number;
+    flow: "expense" | "income";
     category: string;
     description: string;
     scope: Scope;
@@ -43,8 +44,13 @@ export type BulkPreviewStats = {
 const MAX_PREVIEW_ROWS = 10_000;
 const WARN_ROW_THRESHOLD = 2000;
 
-export function fingerprintTransaction(date: string, amount: number, description: string): string {
-  return `${date}|${Number(amount).toFixed(2)}|${normalizeMerchant(description)}`;
+export function fingerprintTransaction(
+  date: string,
+  amount: number,
+  description: string,
+  flow: "expense" | "income" = "expense",
+): string {
+  return `${date}|${Number(amount).toFixed(2)}|${normalizeMerchant(description)}|${flow}`;
 }
 
 function normalizeHeader(h: string): string {
@@ -68,12 +74,16 @@ export function guessColumnMap(headers: string[]): BulkColumnMap {
   return map;
 }
 
-export function coerceAmount(raw: string | undefined): { value: number | null; issue?: string } {
+export function coerceAmount(raw: string | undefined): {
+  value: number | null;
+  flow?: "expense" | "income";
+  issue?: string;
+} {
   if (raw == null || String(raw).trim() === "") return { value: null };
   let s = String(raw).trim();
-  let negative = false;
+  let parenNegative = false;
   if (/^\(.*\)$/.test(s)) {
-    negative = true;
+    parenNegative = true;
     s = s.slice(1, -1);
   }
   s = s.replace(/HK\$|\$|HKD/gi, "").replace(/\s/g, "");
@@ -82,9 +92,13 @@ export function coerceAmount(raw: string | undefined): { value: number | null; i
   else s = s.replace(/,/g, "");
   const n = Number(s);
   if (!Number.isFinite(n) || n === 0) return { value: null, issue: "Could not parse amount" };
-  const out = negative ? -Math.abs(n) : n;
-  if (out <= 0) return { value: null, issue: "Amount must be greater than zero" };
-  return { value: out };
+  if (parenNegative) {
+    return { value: Math.abs(n), flow: "expense" };
+  }
+  if (n < 0) {
+    return { value: Math.abs(n), flow: "income" };
+  }
+  return { value: n, flow: "expense" };
 }
 
 export function coerceDate(raw: string | undefined): { value: string | null; issue?: string } {
@@ -145,6 +159,7 @@ function rowFromCsvRecord(
   const draft = {
     date: d.value,
     amount: a.value,
+    flow: a.flow ?? "expense",
     category,
     description,
     scope,
@@ -189,8 +204,15 @@ function rowFromJsonObject(obj: unknown, sourceIndex: number): { draft: Record<s
     issues.push("Description was empty; using placeholder");
   }
 
+  let flow: "expense" | "income" = a.flow ?? "expense";
+  const flowCandidate = o.flow ?? o.kind ?? o.type;
+  if (typeof flowCandidate === "string") {
+    const v = flowCandidate.trim().toLowerCase();
+    if (v === "income" || v === "expense") flow = v;
+  }
+
   return {
-    draft: { date: d.value, amount: a.value, category: cat, description: desc, scope },
+    draft: { date: d.value, amount: a.value, flow, category: cat, description: desc, scope },
     issues,
   };
 }
@@ -296,13 +318,16 @@ export function previewBulkImport(params: {
     const { draft, issues } =
       params.format === "csv" && record ? rowFromCsvRecord(record, csvColumnMap, sourceIndex) : rowFromJsonObject(json, sourceIndex);
 
-    const parsed = transactionSchema.safeParse({
-      date: draft.date,
-      amount: draft.amount,
-      category: draft.category,
-      description: draft.description,
-      scope: draft.scope,
-    });
+    const parsed = transactionSchema.safeParse(
+      normalizeRawTransactionForImport({
+        date: draft.date,
+        amount: draft.amount,
+        flow: draft.flow,
+        category: draft.category,
+        description: draft.description,
+        scope: draft.scope,
+      }),
+    );
 
     if (!parsed.success) {
       const flat = parsed.error.flatten();
@@ -320,7 +345,7 @@ export function previewBulkImport(params: {
     }
 
     const tx = parsed.data;
-    const fp = fingerprintTransaction(tx.date, tx.amount, tx.description);
+    const fp = fingerprintTransaction(tx.date, tx.amount, tx.description, tx.flow);
     if (fingerprintsInBatch.has(fp)) {
       rows.push({
         sourceIndex,
@@ -347,6 +372,7 @@ export function previewBulkImport(params: {
       transaction: {
         date: tx.date,
         amount: tx.amount,
+        flow: tx.flow,
         category: tx.category,
         description: tx.description,
         scope: tx.scope,

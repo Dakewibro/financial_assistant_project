@@ -13,10 +13,14 @@ export type Scope = "personal" | "business";
 export type Period = "daily" | "weekly" | "monthly";
 export type Frequency = "weekly" | "biweekly" | "monthly" | "irregular";
 
+/** Ledger direction: positive `amount` magnitude; income vs outflow is explicit (not signed amount). */
+export type TxnFlow = "expense" | "income";
+
 export interface Transaction {
   id: string;
   date: string;
   amount: number;
+  flow: TxnFlow;
   category: string;
   description: string;
   normalizedMerchant: string;
@@ -24,6 +28,10 @@ export interface Transaction {
   notes?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export function countsAsExpense(tx: Pick<Transaction, "flow">): boolean {
+  return tx.flow !== "income";
 }
 
 export type RuleType =
@@ -123,6 +131,8 @@ export interface TransactionFilters {
   fromDate?: string;
   toDate?: string;
   scope?: Scope;
+  /** When set, only return rows with this flow (Mongo + memory). */
+  flow?: TxnFlow;
   recurringOnly?: boolean;
   search?: string;
 }

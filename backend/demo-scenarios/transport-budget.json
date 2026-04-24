@@ -1,0 +1,80 @@
+{
+  "transactions": [
+    { "date": "2026-03-02", "amount": 42, "category": "Transport", "description": "Bus week 1", "scope": "personal" },
+    { "date": "2026-03-03", "amount": 38, "category": "Transport", "description": "Tram", "scope": "personal" },
+    { "date": "2026-03-04", "amount": 55, "category": "Transport", "description": "MTR commute", "scope": "personal" },
+    { "date": "2026-03-05", "amount": 22, "category": "Food", "description": "Breakfast", "scope": "personal" },
+    { "date": "2026-03-07", "amount": 48, "category": "Transport", "description": "Taxi short", "scope": "personal" },
+    { "date": "2026-03-08", "amount": 26, "category": "Food", "description": "Lunch box", "scope": "personal" },
+    { "date": "2026-03-09", "amount": 33, "category": "Transport", "description": "Ferry hop", "scope": "personal" },
+    { "date": "2026-03-10", "amount": 44, "category": "Transport", "description": "Ride share", "scope": "personal" },
+    {
+      "date": "2026-03-01",
+      "amount": 80,
+      "category": "Transport",
+      "description": "MTR top-up",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-03-06",
+      "amount": 120,
+      "category": "Transport",
+      "description": "Taxi rides",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-03-11",
+      "amount": 90,
+      "category": "Transport",
+      "description": "Airport train",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-03-12",
+      "amount": 50,
+      "category": "Food",
+      "description": "Lunch",
+      "scope": "personal"
+    },
+    { "date": "2026-03-13", "amount": 36, "category": "Transport", "description": "Shuttle", "scope": "personal" },
+    { "date": "2026-03-14", "amount": 28, "category": "Transport", "description": "Parking", "scope": "personal" },
+    { "date": "2026-03-15", "amount": 31, "category": "Transport", "description": "Green minibus", "scope": "personal" },
+    { "date": "2026-03-16", "amount": 19, "category": "Food", "description": "Snack", "scope": "personal" },
+    { "date": "2026-03-17", "amount": 47, "category": "Transport", "description": "Cross-harbour", "scope": "personal" },
+    { "date": "2026-03-18", "amount": 29, "category": "Transport", "description": "Bike share", "scope": "personal" },
+    { "date": "2026-03-19", "amount": 24, "category": "Food", "description": "Tea", "scope": "personal" },
+    { "date": "2026-03-20", "amount": 52, "category": "Transport", "description": "Airport bus", "scope": "personal" },
+    { "date": "2026-03-21", "amount": 34, "category": "Transport", "description": "Night surcharge", "scope": "personal" },
+    { "date": "2026-03-22", "amount": 21, "category": "Food", "description": "Bun", "scope": "personal" },
+    { "date": "2026-03-23", "amount": 41, "category": "Transport", "description": "Express link", "scope": "personal" },
+    { "date": "2026-03-24", "amount": 37, "category": "Transport", "description": "Tunnel toll share", "scope": "personal" },
+    { "date": "2026-03-25", "amount": 18, "category": "Food", "description": "Juice", "scope": "personal" },
+    { "date": "2026-03-26", "amount": 46, "category": "Transport", "description": "Peak taxi", "scope": "personal" },
+    { "date": "2026-03-27", "amount": 32, "category": "Transport", "description": "Light rail", "scope": "personal" },
+    { "date": "2026-03-28", "amount": 25, "category": "Food", "description": "Groceries", "scope": "personal" },
+    { "date": "2026-03-29", "amount": 39, "category": "Transport", "description": "Sunday errands", "scope": "personal" }
+  ],
+  "rules": [
+    {
+      "ruleType": "period_cap",
+      "period": "monthly",
+      "threshold": 300,
+      "enabled": true
+    },
+    {
+      "ruleType": "category_cap",
+      "category": "Transport",
+      "period": "monthly",
+      "threshold": 950,
+      "enabled": true
+    },
+    {
+      "ruleType": "category_percentage",
+      "category": "Transport",
+      "period": "monthly",
+      "threshold": 30,
+      "enabled": true
+    }
+  ],
+  "categories": []
+}

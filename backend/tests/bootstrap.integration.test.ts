@@ -13,6 +13,7 @@ describe("bootstrap aggregation", () => {
         {
           date: "2026-02-16",
           amount: 88,
+          flow: "expense",
           category: "Subscription",
           description: "Streaming A",
           normalizedMerchant: "streaming a",
@@ -21,6 +22,7 @@ describe("bootstrap aggregation", () => {
         {
           date: "2026-03-16",
           amount: 88,
+          flow: "expense",
           category: "Subscription",
           description: "Streaming A",
           normalizedMerchant: "streaming a",
@@ -29,6 +31,7 @@ describe("bootstrap aggregation", () => {
         {
           date: "2026-04-16",
           amount: 88,
+          flow: "expense",
           category: "Subscription",
           description: "Streaming A",
           normalizedMerchant: "streaming a",
@@ -37,6 +40,7 @@ describe("bootstrap aggregation", () => {
         {
           date: "2026-04-15",
           amount: 45,
+          flow: "expense",
           category: "Food",
           description: "Lunch",
           normalizedMerchant: "lunch",

@@ -1,0 +1,48 @@
+{
+  "transactions": [
+    {
+      "date": "2026-03-10",
+      "amount": 42,
+      "category": "Food",
+      "description": "CityBrew Central HK",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-03-12",
+      "amount": 38,
+      "category": "Food",
+      "description": "CityBrew Central HK",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-03-14",
+      "amount": 41,
+      "category": "Food",
+      "description": "CityBrew Central HK",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-03-16",
+      "amount": 39,
+      "category": "Food",
+      "description": "CityBrew Central HK",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-03-18",
+      "amount": 40,
+      "category": "Food",
+      "description": "CityBrew Central HK",
+      "scope": "personal"
+    },
+    {
+      "date": "2026-03-20",
+      "amount": 37,
+      "category": "Uncategorized",
+      "description": "CityBrew Central HK",
+      "scope": "personal"
+    }
+  ],
+  "rules": [],
+  "categories": []
+}

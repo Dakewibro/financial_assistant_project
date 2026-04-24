@@ -46,6 +46,7 @@ describe("import payload processing", () => {
         {
           date: "2026-04-16",
           amount: 30,
+          flow: "expense",
           category: "Food",
           description: "Lunch",
           normalizedMerchant: "lunch",
@@ -71,8 +72,8 @@ describe("import payload processing", () => {
             scope: "personal",
           },
           {
-            date: "2026-04-19",
-            amount: -4,
+            date: "not-a-date",
+            amount: 12,
             category: "Transport",
             description: "Bus",
             scope: "personal",
@@ -80,7 +81,7 @@ describe("import payload processing", () => {
         ],
         rules: [],
       }),
-    ).rejects.toThrow("Invalid transaction at index 1");
+    ).rejects.toThrow(/Invalid transaction at index 1/);
 
     const transactions = await repository.listTransactions();
     expect(transactions).toHaveLength(1);

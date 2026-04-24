@@ -20,6 +20,7 @@ describe("summaryService", () => {
         id: "1",
         date: "2026-04-16",
         amount: 70,
+        flow: "expense",
         category: "Food",
         description: "Lunch",
         normalizedMerchant: "lunch",
@@ -31,6 +32,7 @@ describe("summaryService", () => {
         id: "2",
         date: "2026-04-15",
         amount: 40,
+        flow: "expense",
         category: "Transport",
         description: "Taxi",
         normalizedMerchant: "taxi",
@@ -42,6 +44,7 @@ describe("summaryService", () => {
         id: "3",
         date: "2026-04-10",
         amount: 30,
+        flow: "expense",
         category: "Food",
         description: "Dinner",
         normalizedMerchant: "dinner",
@@ -59,6 +62,40 @@ describe("summaryService", () => {
     expect(summary.top3Categories[0].category).toBe("Food");
     expect(summary.trend7Days).toHaveLength(7);
     expect(summary.trend30Days).toHaveLength(30);
+  });
+
+  it("excludes income flows from spending totals", () => {
+    const transactions: Transaction[] = [
+      {
+        id: "1",
+        date: "2026-04-16",
+        amount: 50,
+        flow: "expense",
+        category: "Food",
+        description: "Lunch",
+        normalizedMerchant: "lunch",
+        scope: "personal",
+        createdAt: "2026-04-16T09:00:00Z",
+        updatedAt: "2026-04-16T09:00:00Z",
+      },
+      {
+        id: "2",
+        date: "2026-04-16",
+        amount: 5000,
+        flow: "income",
+        category: "Bills",
+        description: "Salary",
+        normalizedMerchant: "salary",
+        scope: "personal",
+        createdAt: "2026-04-16T09:00:00Z",
+        updatedAt: "2026-04-16T09:00:00Z",
+      },
+    ];
+    const summary = computeSummary(transactions);
+    expect(summary.totalSpending).toBe(50);
+    expect(summary.monthlyTotal).toBe(50);
+    expect(summary.perCategoryTotals.Food).toBe(50);
+    expect(summary.perCategoryTotals.Bills).toBeUndefined();
   });
 });
 
@@ -78,6 +115,7 @@ describe("alertService", () => {
         id: "1",
         date: "2026-02-16",
         amount: 88,
+        flow: "expense",
         category: "Subscription",
         description: "Streaming A",
         normalizedMerchant: "streaming a",
@@ -89,6 +127,7 @@ describe("alertService", () => {
         id: "2",
         date: "2026-03-16",
         amount: 88,
+        flow: "expense",
         category: "Subscription",
         description: "Streaming A",
         normalizedMerchant: "streaming a",
@@ -100,6 +139,7 @@ describe("alertService", () => {
         id: "3",
         date: "2026-04-16",
         amount: 88,
+        flow: "expense",
         category: "Subscription",
         description: "Streaming A",
         normalizedMerchant: "streaming a",
@@ -111,6 +151,7 @@ describe("alertService", () => {
         id: "4",
         date: "2026-04-15",
         amount: 70,
+        flow: "expense",
         category: "Food",
         description: "Lunch",
         normalizedMerchant: "lunch",
@@ -122,6 +163,7 @@ describe("alertService", () => {
         id: "5",
         date: "2026-04-15",
         amount: 10,
+        flow: "expense",
         category: "Uncategorized",
         description: "Misc",
         normalizedMerchant: "misc",

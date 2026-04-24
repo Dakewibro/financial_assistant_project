@@ -1,9 +1,17 @@
 import { randomUUID } from "node:crypto";
+import mongoose from "mongoose";
 import { getEnv } from "./config/env.js";
 import { BudgetRuleModel } from "./models/BudgetRule.js";
 import { CategoryModel } from "./models/Category.js";
 import { TransactionModel } from "./models/Transaction.js";
-import { DEFAULT_CATEGORIES, type BudgetRule, type Scope, type Transaction, type TransactionFilters } from "./types.js";
+import {
+  DEFAULT_CATEGORIES,
+  type BudgetRule,
+  type Scope,
+  type Transaction,
+  type TransactionFilters,
+  type TxnFlow,
+} from "./types.js";
 import { escapeRegex } from "./utils/escapeRegex.js";
 import { normalizeMerchant } from "./utils/normalizeMerchant.js";
 
@@ -26,8 +34,10 @@ function toIsoString(value: Date | string | undefined): string {
 
 function mapTransactionDocument(doc: {
   id: string;
+  _id?: { toString: () => string };
   date: string;
   amount: number;
+  flow?: TxnFlow;
   category: string;
   description: string;
   normalizedMerchant: string;
@@ -36,10 +46,13 @@ function mapTransactionDocument(doc: {
   createdAt?: Date;
   updatedAt?: Date;
 }): Transaction {
+  const id = doc.id ?? doc._id?.toString() ?? "";
+  const flow: TxnFlow = doc.flow === "income" ? "income" : "expense";
   return {
-    id: doc.id,
+    id,
     date: doc.date,
     amount: doc.amount,
+    flow,
     category: doc.category,
     description: doc.description,
     normalizedMerchant: doc.normalizedMerchant,
@@ -76,6 +89,7 @@ function filterTransactionsLocally(transactions: Transaction[], filters: Omit<Tr
     if (filters.fromDate && tx.date < filters.fromDate) return false;
     if (filters.toDate && tx.date > filters.toDate) return false;
     if (filters.scope && filters.scope !== tx.scope) return false;
+    if (filters.flow && tx.flow !== filters.flow) return false;
     if (filters.search) {
       const haystack = `${tx.description} ${tx.normalizedMerchant} ${tx.category}`.toLowerCase();
       if (!haystack.includes(filters.search.toLowerCase())) return false;
@@ -161,14 +175,23 @@ export async function listTransactions(filters: Omit<TransactionFilters, "recurr
     if (filters.fromDate) Object.assign(query.date as Record<string, string>, { $gte: filters.fromDate });
     if (filters.toDate) Object.assign(query.date as Record<string, string>, { $lte: filters.toDate });
   }
+  const andParts: Record<string, unknown>[] = [];
   if (filters.search) {
     const safePattern = escapeRegex(filters.search);
-    query.$or = [
-      { description: { $regex: safePattern, $options: "i" } },
-      { normalizedMerchant: { $regex: safePattern, $options: "i" } },
-      { category: { $regex: safePattern, $options: "i" } },
-    ];
+    andParts.push({
+      $or: [
+        { description: { $regex: safePattern, $options: "i" } },
+        { normalizedMerchant: { $regex: safePattern, $options: "i" } },
+        { category: { $regex: safePattern, $options: "i" } },
+      ],
+    });
   }
+  if (filters.flow === "expense") {
+    andParts.push({ $or: [{ flow: "expense" }, { flow: { $exists: false } }] });
+  } else if (filters.flow === "income") {
+    query.flow = "income";
+  }
+  if (andParts.length > 0) query.$and = andParts;
 
   const docs = await TransactionModel.find(query).sort({ date: -1, createdAt: -1 });
   return docs.map((doc) => mapTransactionDocument(doc));
@@ -185,10 +208,14 @@ export async function appendTransactions(
 ): Promise<Transaction[]> {
   const env = getEnv();
   const now = new Date().toISOString();
-  const normalized = inputs.map((input) => ({
-    ...input,
-    normalizedMerchant: input.normalizedMerchant ?? normalizeMerchant(input.description),
-  }));
+  const normalized = inputs.map((input) => {
+    const flow: TxnFlow = input.flow === "income" ? "income" : "expense";
+    return {
+      ...input,
+      flow,
+      normalizedMerchant: input.normalizedMerchant ?? normalizeMerchant(input.description),
+    };
+  });
 
   if (env.storageMode === "memory") {
     const created: Transaction[] = normalized.map((input) => ({
@@ -207,6 +234,7 @@ export async function appendTransactions(
     normalized.map((tx) => ({
       date: tx.date,
       amount: tx.amount,
+      flow: tx.flow,
       category: tx.category,
       description: tx.description,
       normalizedMerchant: tx.normalizedMerchant,
@@ -237,6 +265,7 @@ export async function createTransaction(
   const doc = await TransactionModel.create({
     date: input.date,
     amount: input.amount,
+    flow: input.flow === "income" ? "income" : "expense",
     category: input.category,
     description: input.description,
     normalizedMerchant: input.normalizedMerchant,
@@ -255,7 +284,8 @@ export async function deleteTransaction(id: string): Promise<boolean> {
     return memoryStore.transactions.length < before;
   }
 
-  const result = await TransactionModel.deleteOne({ id });
+  if (!mongoose.Types.ObjectId.isValid(id)) return false;
+  const result = await TransactionModel.deleteOne({ _id: id });
   return result.deletedCount > 0;
 }
 
@@ -268,6 +298,7 @@ export async function replaceTransactions(
   if (env.storageMode === "memory") {
     memoryStore.transactions = transactions.map((tx) => ({
       ...tx,
+      flow: tx.flow === "income" ? "income" : "expense",
       normalizedMerchant: tx.normalizedMerchant ?? normalizeMerchant(tx.description),
       id: randomUUID(),
       createdAt: tx.createdAt ?? now,
@@ -282,6 +313,7 @@ export async function replaceTransactions(
       transactions.map((tx) => ({
         date: tx.date,
         amount: tx.amount,
+        flow: tx.flow === "income" ? "income" : "expense",
         category: tx.category,
         description: tx.description,
         normalizedMerchant: tx.normalizedMerchant ?? normalizeMerchant(tx.description),

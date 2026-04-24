@@ -12,7 +12,7 @@ import QuickAddDialog from "../components/QuickAddDialog";
 import { toast } from "sonner";
 
 const ACCOUNTS = ["all", "personal", "business"];
-const TYPES = ["all", "expense", "income"];
+const FLOWS = ["all", "expense", "income"];
 
 export default function Transactions() {
   const [searchParams] = useSearchParams();
@@ -21,19 +21,19 @@ export default function Transactions() {
   const [err, setErr] = useState("");
   const [q, setQ] = useState("");
   const [account, setAccount] = useState("all");
-  const [type, setType] = useState("all");
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(null);
   const [categories, setCategories] = useState([]);
   const [catFilter, setCatFilter] = useState(searchParams.get("category") || "all");
+  const [flowFilter, setFlowFilter] = useState("all");
 
   const load = async () => {
     setLoading(true); setErr("");
     const params = new URLSearchParams();
-    if (q.trim()) params.append("q", q.trim());
-    if (account !== "all") params.append("account", account);
-    if (type !== "all") params.append("type", type);
+    if (q.trim()) params.append("search", q.trim());
+    if (account !== "all") params.append("scope", account);
     if (catFilter !== "all") params.append("category", catFilter);
+    if (flowFilter !== "all") params.append("flow", flowFilter);
     try {
       const { data } = await api.get(`/transactions?${params.toString()}`);
       setTxns(normalizeTransactionList(data));
@@ -41,7 +41,7 @@ export default function Transactions() {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [account, type, catFilter]);
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [account, catFilter, flowFilter]);
   useEffect(() => {
     const t = setTimeout(load, 250);
     return () => clearTimeout(t);
@@ -59,7 +59,7 @@ export default function Transactions() {
     } catch (e) { toast.error(formatApiError(e)); }
   };
 
-  const filtersActive = q || account !== "all" || type !== "all" || catFilter !== "all";
+  const filtersActive = q || account !== "all" || catFilter !== "all" || flowFilter !== "all";
 
   return (
     <Page>
@@ -83,10 +83,9 @@ export default function Transactions() {
             <Filter size={14} className="text-[color:var(--text-muted)] mr-1" />
             <span className="text-xs text-[color:var(--text-secondary)] mr-1">Account</span>
             {ACCOUNTS.map(a => <Chip key={a} active={account === a} onClick={() => setAccount(a)} testid={`filter-account-${a}`}>{a}</Chip>)}
-          </div>
-          <div className="flex items-center gap-1 flex-wrap">
+            <span className="text-xs text-[color:var(--text-secondary)] mx-1">·</span>
             <span className="text-xs text-[color:var(--text-secondary)] mr-1">Type</span>
-            {TYPES.map(t => <Chip key={t} active={type === t} onClick={() => setType(t)} testid={`filter-type-${t}`}>{t}</Chip>)}
+            {FLOWS.map(f => <Chip key={f} active={flowFilter === f} onClick={() => setFlowFilter(f)} testid={`filter-flow-${f}`}>{f}</Chip>)}
           </div>
         </div>
         {categories.length > 0 && (
@@ -113,7 +112,7 @@ export default function Transactions() {
             title={filtersActive ? "No matches" : "No transactions yet"}
             body={filtersActive ? "Try clearing filters or searching differently." : "Add your first transaction to start tracking."}
             action={filtersActive
-              ? <Button variant="ghost" onClick={() => { setQ(""); setAccount("all"); setType("all"); setCatFilter("all"); }} data-testid="clear-filters-btn">Clear filters</Button>
+              ? <Button variant="ghost" onClick={() => { setQ(""); setAccount("all"); setCatFilter("all"); setFlowFilter("all"); }} data-testid="clear-filters-btn">Clear filters</Button>
               : <Button onClick={() => setOpen(true)} className="bg-moss hover:bg-moss-hover text-white" data-testid="empty-add-btn">Add transaction</Button>}
             testid="txn-empty"
           />

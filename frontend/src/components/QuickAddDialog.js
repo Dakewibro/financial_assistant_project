@@ -49,11 +49,13 @@ function autoSourceDescription(source) {
 }
 
 /** Body for POST /api/transactions (matches backend transactionSchema). */
-function buildCreateTransactionBody({ merchant, amount, category, account, note }) {
+function buildCreateTransactionBody({ merchant, amount, category, account, note, flow }) {
   const amt = typeof amount === "number" ? amount : parseFloat(String(amount));
+  const flowVal = flow === "income" ? "income" : "expense";
   return {
     date: todayIsoDate(),
-    amount: amt,
+    amount: Math.abs(amt),
+    flow: flowVal,
     category: (category && String(category).trim()) || "Uncategorized",
     description: String(merchant || "").trim(),
     notes: note && String(note).trim() ? String(note).trim() : undefined,
@@ -347,6 +349,7 @@ export default function QuickAddDialog({ open, onClose, onSaved }) {
           category,
           account,
           note: data.note,
+          flow: type,
         }),
       );
       localStorage.setItem(LAST_ACCOUNT_KEY, account);
@@ -375,7 +378,7 @@ export default function QuickAddDialog({ open, onClose, onSaved }) {
     try {
       await api.post(
         "/transactions",
-        buildCreateTransactionBody({ merchant: merchant.trim(), amount: amt, category, account, note }),
+        buildCreateTransactionBody({ merchant: merchant.trim(), amount: amt, category, account, note, flow: type }),
       );
       localStorage.setItem(LAST_ACCOUNT_KEY, account);
       toast.success("Transaction added", { description: `${merchant} · ${HKD(amt)}` });

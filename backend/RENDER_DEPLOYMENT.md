@@ -18,15 +18,19 @@ If this Render service existed before the current blueprint settings were added,
 ## Required environment variables
 
 - `STORAGE_MODE=mongo`
+- `JWT_SECRET=<long random string; required in production — the app refuses to start with the dev default when `VERCEL=1` or `NODE_ENV=production`>`
 - `ADMIN_API_TOKEN=<secret required for protected mutation endpoints>`
 - `MONGODB_URI=<your Atlas connection string>`
 - `MONGODB_DB=financial_assistant`
 - `ALLOWED_ORIGINS=<your frontend URL>`
+- `AUTH_ENFORCED` — on production hosts (`NODE_ENV=production` or `VERCEL=1`) the API defaults to requiring a Bearer token on enforced routes. Set `AUTH_ENFORCED=false` only for trusted private demos.
+- `DEMO_MUTATIONS_ENABLED` — demo load/clear/seed default **off** in production (shared Mongo). Set `DEMO_MUTATIONS_ENABLED=true` so logged-in users can run demos without `x-admin-token`, or keep it off and use `x-admin-token` with `ADMIN_API_TOKEN`.
 
 Example:
 
 ```text
 STORAGE_MODE=mongo
+JWT_SECRET=<openssl rand -base64 48>
 ADMIN_API_TOKEN=<set-a-strong-secret>
 MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>/<dbname>?retryWrites=true&w=majority
 MONGODB_DB=financial_assistant

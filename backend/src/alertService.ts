@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek.js";
 import { randomUUID } from "node:crypto";
-import type { Alert, BudgetRule, RecurringGroup, Transaction } from "./types.js";
+import { countsAsExpense, type Alert, type BudgetRule, type RecurringGroup, type Transaction } from "./types.js";
 
 dayjs.extend(isoWeek);
 
@@ -68,8 +68,9 @@ function buildCapAlerts(rule: BudgetRule, amount: number, label: string): Alert[
 }
 
 function getStreakLength(transactions: Transaction[], dailyThreshold: number): number {
-  if (transactions.length === 0 || dailyThreshold <= 0) return 0;
-  const dateTotals = transactions.reduce<Record<string, number>>((acc, tx) => {
+  const spending = transactions.filter(countsAsExpense);
+  if (spending.length === 0 || dailyThreshold <= 0) return 0;
+  const dateTotals = spending.reduce<Record<string, number>>((acc, tx) => {
     acc[tx.date] = (acc[tx.date] ?? 0) + tx.amount;
     return acc;
   }, {});
@@ -101,7 +102,7 @@ export function evaluateAlerts(transactions: Transaction[], rules: BudgetRule[],
 
   for (const rule of rules.filter((item) => item.enabled)) {
     const scopedTransactions = filterByScope(transactions, rule);
-    const periodTransactions = filterByPeriod(scopedTransactions, rule.period);
+    const periodTransactions = filterByPeriod(scopedTransactions, rule.period).filter(countsAsExpense);
 
     if (rule.ruleType === "category_cap" && rule.category) {
       const categoryAmount = periodTransactions
@@ -186,7 +187,9 @@ export function evaluateAlerts(transactions: Transaction[], rules: BudgetRule[],
   }
 
   const duplicateWindow = dayjs().subtract(45, "day");
-  const recentForDup = transactions.filter((tx) => !dayjs(tx.date).isBefore(duplicateWindow, "day"));
+  const recentForDup = transactions.filter(
+    (tx) => countsAsExpense(tx) && !dayjs(tx.date).isBefore(duplicateWindow, "day"),
+  );
   const dupGroups = new Map<string, Transaction[]>();
   for (const tx of recentForDup) {
     const key = `${tx.normalizedMerchant}::${Number(tx.amount).toFixed(2)}`;

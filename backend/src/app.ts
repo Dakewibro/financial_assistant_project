@@ -32,10 +32,29 @@ import { suggestCategory as suggestCategoryFromHistory } from "./services/catego
 import { generateInsights } from "./services/insightService.js";
 import { detectRecurringGroups } from "./services/recurringService.js";
 import { computeSummary } from "./summaryService.js";
-import { DEFAULT_CATEGORIES, type BootstrapResponse, type BudgetRule, type Scope, type Transaction, type TransactionFilters } from "./types.js";
+import {
+  countsAsExpense,
+  DEFAULT_CATEGORIES,
+  type BootstrapResponse,
+  type BudgetRule,
+  type Scope,
+  type Transaction,
+  type TransactionFilters,
+  type TxnFlow,
+} from "./types.js";
 import { normalizeMerchant } from "./utils/normalizeMerchant.js";
-import { previewBulkImport, type BulkColumnMap } from "./services/bulkImportService.js";
-import { budgetRuleSchema, categorySchema, transactionSchema } from "./validation.js";
+import { fingerprintTransaction, previewBulkImport, type BulkColumnMap } from "./services/bulkImportService.js";
+import { budgetRuleSchema, categorySchema, normalizeRawTransactionForImport, transactionSchema } from "./validation.js";
+import {
+  createUser,
+  findUserByEmail,
+  findUserById,
+  getDefaultOwnerUserId,
+  updateUserById,
+  type AuthUserShape as AuthUser,
+} from "./userRepository.js";
+import { budgets, goals, shareIndex, dashboardPrefs, type BudgetResource, type GoalResource } from "./workspaceRuntime.js";
+import { hydrateWorkspaceFromMongo, installWorkspacePersistOnFinish, touchWorkspace } from "./workspacePersistence.js";
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek.js";
 
@@ -62,43 +81,6 @@ interface ProtectedMutationAccessResult {
   status?: number;
 }
 
-type AuthUser = {
-  id: string;
-  name: string;
-  email: string;
-  passwordHash: string;
-  onboarded: boolean;
-  monthlyIncome: number;
-  primaryUse: "personal" | "freelancer" | "mixed";
-};
-
-type BudgetRuleRef = { ruleType: BudgetRule["ruleType"]; period: BudgetRule["period"] };
-
-type BudgetResource = {
-  id: string;
-  ownerId: string;
-  name: string;
-  category: string;
-  account: Scope;
-  limit: number;
-  memberIds: string[];
-  shareToken?: string;
-  /** Present when this row mirrors an imported budget rule (drives period math on GET /budgets). */
-  ruleRef?: BudgetRuleRef;
-};
-
-type GoalResource = {
-  id: string;
-  ownerId: string;
-  name: string;
-  kind: string;
-  targetAmount: number;
-  currentAmount: number;
-  monthlyContribution: number;
-  memberIds: string[];
-  shareToken?: string;
-};
-
 const users: AuthUser[] = [
   {
     id: "demo-user",
@@ -111,10 +93,6 @@ const users: AuthUser[] = [
   },
 ];
 const acknowledgedAlertIds = new Set<string>();
-const budgets: BudgetResource[] = [];
-const goals: GoalResource[] = [];
-const shareIndex = new Map<string, { kind: "budget" | "goal"; resourceId: string; ownerId: string }>();
-const dashboardPrefs = new Map<string, { widgets: Array<{ id: string; size: "s" | "m" | "l" }> }>();
 
 function originAllowed(origin: string | undefined): boolean {
   if (!origin) return true;
@@ -132,14 +110,27 @@ function parseScope(value: unknown): Scope | undefined {
   return value === "personal" || value === "business" ? value : undefined;
 }
 
+function parseFlowFilter(query: Record<string, unknown>): TxnFlow | undefined {
+  const raw = query.flow ?? query.kind ?? query.type;
+  if (typeof raw !== "string") return undefined;
+  const v = raw.trim().toLowerCase();
+  if (v === "expense" || v === "income") return v;
+  return undefined;
+}
+
 function parseTransactionFilters(query: Record<string, unknown>): TransactionFilters {
+  const searchRaw =
+    (typeof query.search === "string" && query.search) || (typeof query.q === "string" && query.q) || "";
+  const search = searchRaw.trim().length > 0 ? searchRaw.trim() : undefined;
+  const scopeFromQuery = parseScope(query.scope) ?? parseScope(query.account);
   return {
     category: typeof query.category === "string" ? query.category : undefined,
     fromDate: typeof query.fromDate === "string" ? query.fromDate : undefined,
     toDate: typeof query.toDate === "string" ? query.toDate : undefined,
-    scope: parseScope(query.scope),
+    scope: scopeFromQuery,
+    flow: parseFlowFilter(query),
     recurringOnly: query.recurringOnly === "true",
-    search: typeof query.search === "string" && query.search.length > 0 ? query.search : undefined,
+    search,
   };
 }
 
@@ -158,16 +149,35 @@ function createAuthToken(user: AuthUser) {
   return jwt.sign({ sub: user.id, email: user.email }, getJwtSecret(), { expiresIn: "7d" });
 }
 
-function getAuthUser(req: express.Request) {
+type RequestWithAuthUser = express.Request & { authUser?: AuthUser | null };
+
+async function attachAuthUser(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const r = req as RequestWithAuthUser;
+  r.authUser = null;
   const token = getBearerToken(req.header("authorization"));
-  if (!token) return null;
+  if (!token) {
+    next();
+    return;
+  }
   try {
     const payload = jwt.verify(token, getJwtSecret()) as { sub?: string };
-    if (!payload.sub) return null;
-    return users.find((entry) => entry.id === payload.sub) ?? null;
+    if (!payload.sub) {
+      next();
+      return;
+    }
+    if (getEnv().storageMode === "memory") {
+      r.authUser = users.find((entry) => entry.id === payload.sub) ?? null;
+    } else {
+      r.authUser = await findUserById(payload.sub);
+    }
   } catch {
-    return null;
+    r.authUser = null;
   }
+  next();
+}
+
+function getAuthUser(req: express.Request): AuthUser | null {
+  return (req as RequestWithAuthUser).authUser ?? null;
 }
 
 function maybeRequireAuth(req: express.Request, res: express.Response) {
@@ -220,6 +230,16 @@ function requireProtectedMutationAccess(req: express.Request, res: express.Respo
   return false;
 }
 
+/**
+ * Demo load/clear/seed: in production Mongo, requires `DEMO_MUTATIONS_ENABLED=true` plus a signed-in user,
+ * or a valid `x-admin-token`. Import / generate-test-data stay admin-gated via `requireProtectedMutationAccess`.
+ */
+function requireProtectedDemoAccess(req: express.Request, res: express.Response): boolean {
+  if (getEnv().storageMode === "memory") return true;
+  if (getEnv().demoMutationsEnabled && getAuthUser(req)) return true;
+  return requireProtectedMutationAccess(req, res);
+}
+
 export function parseImportPayload(body: unknown): { payload?: ImportPayload; error?: string } {
   if (!body || typeof body !== "object") {
     return { error: "Malformed import payload" };
@@ -232,7 +252,7 @@ export function parseImportPayload(body: unknown): { payload?: ImportPayload; er
 
   const cleanTransactions: Array<Omit<Transaction, "id" | "createdAt" | "updatedAt">> = [];
   for (const [index, tx] of transactions.entries()) {
-    const result = transactionSchema.safeParse(tx);
+    const result = transactionSchema.safeParse(normalizeRawTransactionForImport(tx));
     if (!result.success) {
       return { error: `Invalid transaction at index ${index}` };
     }
@@ -290,8 +310,10 @@ export async function importPayload(body: unknown): Promise<{ importedTransactio
 async function refreshBudgetsFromRules(): Promise<void> {
   budgets.splice(0, budgets.length);
   const rules = await listRules();
-  const ownerId = users[0]?.id ?? "demo-user";
-  const memberIds = users.length ? users.map((u) => u.id) : [ownerId];
+  const ownerId =
+    getEnv().storageMode === "memory" ? (users[0]?.id ?? "demo-user") : await getDefaultOwnerUserId();
+  const memberIds =
+    getEnv().storageMode === "memory" && users.length > 0 ? users.map((u) => u.id) : [ownerId];
   for (const rule of rules) {
     if (!rule.enabled) continue;
     const account: Scope = rule.scope ?? "personal";
@@ -320,6 +342,7 @@ async function refreshBudgetsFromRules(): Promise<void> {
       });
     }
   }
+  touchWorkspace();
 }
 
 function txMatchesBudgetPeriod(tx: Transaction, period: BudgetRule["period"]): boolean {
@@ -343,20 +366,24 @@ function spentAndPctForBudget(
   const rule = rules.find((r) => r.id === b.id);
   if (b.ruleRef?.ruleType === "period_cap" && rule) {
     const scoped = scopedForRule(transactions, rule);
-    const periodTxs = scoped.filter((tx) => txMatchesBudgetPeriod(tx, rule.period));
+    const periodTxs = scoped.filter((tx) => txMatchesBudgetPeriod(tx, rule.period)).filter(countsAsExpense);
     const spent = periodTxs.reduce((sum, tx) => sum + tx.amount, 0);
     return { spent: Number(spent.toFixed(2)), pct: b.limit > 0 ? (spent / b.limit) * 100 : 0 };
   }
   if (b.ruleRef?.ruleType === "category_cap" && rule?.category) {
     const scoped = scopedForRule(transactions, rule);
-    const periodTxs = scoped.filter(
-      (tx) => txMatchesBudgetPeriod(tx, rule.period) && tx.category === rule.category,
-    );
+    const periodTxs = scoped
+      .filter((tx) => txMatchesBudgetPeriod(tx, rule.period) && tx.category === rule.category)
+      .filter(countsAsExpense);
     const spent = periodTxs.reduce((sum, tx) => sum + tx.amount, 0);
     return { spent: Number(spent.toFixed(2)), pct: b.limit > 0 ? (spent / b.limit) * 100 : 0 };
   }
   const monthTxs = transactions.filter(
-    (tx) => tx.scope === b.account && txMatchesBudgetPeriod(tx, "monthly") && tx.category === b.category,
+    (tx) =>
+      countsAsExpense(tx) &&
+      tx.scope === b.account &&
+      txMatchesBudgetPeriod(tx, "monthly") &&
+      tx.category === b.category,
   );
   const spent = monthTxs.reduce((sum, tx) => sum + tx.amount, 0);
   return { spent: Number(spent.toFixed(2)), pct: b.limit > 0 ? (spent / b.limit) * 100 : 0 };
@@ -411,7 +438,7 @@ function buildInsightsPayload(transactions: Transaction[], rules: BudgetRule[]) 
   for (const rule of rules.filter((r) => r.enabled)) {
     if (rule.ruleType === "category_cap" && rule.category) {
       const scoped = scopedForRule(transactions, rule);
-      const periodTxs = scoped.filter((tx) => txMatchesBudgetPeriod(tx, rule.period));
+      const periodTxs = scoped.filter((tx) => txMatchesBudgetPeriod(tx, rule.period)).filter(countsAsExpense);
       const spent = periodTxs.filter((tx) => tx.category === rule.category).reduce((sum, tx) => sum + tx.amount, 0);
       const usedPct = rule.threshold > 0 ? (spent / rule.threshold) * 100 : 0;
       const delta = usedPct - monthPct;
@@ -426,7 +453,7 @@ function buildInsightsPayload(transactions: Transaction[], rules: BudgetRule[]) 
     }
     if (rule.ruleType === "period_cap") {
       const scoped = scopedForRule(transactions, rule);
-      const periodTxs = scoped.filter((tx) => txMatchesBudgetPeriod(tx, rule.period));
+      const periodTxs = scoped.filter((tx) => txMatchesBudgetPeriod(tx, rule.period)).filter(countsAsExpense);
       const spent = periodTxs.reduce((sum, tx) => sum + tx.amount, 0);
       const usedPct = rule.threshold > 0 ? (spent / rule.threshold) * 100 : 0;
       const delta = usedPct - monthPct;
@@ -442,7 +469,7 @@ function buildInsightsPayload(transactions: Transaction[], rules: BudgetRule[]) 
     }
     if (rule.ruleType === "category_percentage" && rule.category) {
       const scoped = scopedForRule(transactions, rule);
-      const periodTxs = scoped.filter((tx) => txMatchesBudgetPeriod(tx, rule.period));
+      const periodTxs = scoped.filter((tx) => txMatchesBudgetPeriod(tx, rule.period)).filter(countsAsExpense);
       const periodAmount = periodTxs.reduce((sum, tx) => sum + tx.amount, 0);
       if (periodAmount > 0) {
         const categoryAmount = periodTxs
@@ -499,6 +526,8 @@ app.use(
     },
   }),
 );
+app.use(attachAuthUser);
+app.use(installWorkspacePersistOnFinish);
 
 const bulkImportRouter = express.Router();
 const bulkImportLimiter = rateLimit({
@@ -537,6 +566,7 @@ bulkImportRouter.post("/apply", async (req, res) => {
   const validated: Array<{
     date: string;
     amount: number;
+    flow: "expense" | "income";
     category: string;
     description: string;
     scope: Scope;
@@ -544,7 +574,7 @@ bulkImportRouter.post("/apply", async (req, res) => {
   }> = [];
 
   for (const row of rawRows) {
-    const parsed = transactionSchema.safeParse(row);
+    const parsed = transactionSchema.safeParse(normalizeRawTransactionForImport(row));
     if (parsed.success) validated.push(parsed.data);
   }
 
@@ -556,15 +586,9 @@ bulkImportRouter.post("/apply", async (req, res) => {
   let skippedDuplicates = 0;
   if (skipDuplicates) {
     const existing = await listTransactions();
-    const seen = new Set(
-      existing.map((tx) =>
-        `${tx.date}|${Number(tx.amount).toFixed(2)}|${normalizeMerchant(tx.description)}`,
-      ),
-    );
+    const seen = new Set(existing.map((tx) => fingerprintTransaction(tx.date, tx.amount, tx.description, tx.flow)));
     const before = toWrite.length;
-    toWrite = toWrite.filter(
-      (tx) => !seen.has(`${tx.date}|${Number(tx.amount).toFixed(2)}|${normalizeMerchant(tx.description)}`),
-    );
+    toWrite = toWrite.filter((tx) => !seen.has(fingerprintTransaction(tx.date, tx.amount, tx.description, tx.flow)));
     skippedDuplicates = before - toWrite.length;
   }
 
@@ -617,12 +641,12 @@ app.use("/api/auth/register", authLimiter);
 app.use("/api/shares", shareLimiter);
 
 app.get("/health", (_req, res) => {
-  const { storageMode, emergentV2Enabled, authEnforced, v2ContractsEnabled } = getEnv();
+  const { storageMode, emergentV2Enabled, authEnforced, demoMutationsEnabled, v2ContractsEnabled } = getEnv();
   const ready = isDatabaseReady();
   res.status(ready ? 200 : 503).json({
     ok: ready,
     storageMode,
-    flags: { emergentV2Enabled, authEnforced, v2ContractsEnabled },
+    flags: { emergentV2Enabled, authEnforced, demoMutationsEnabled, v2ContractsEnabled },
     requestId: res.locals.requestId,
   });
 });
@@ -642,20 +666,47 @@ app.post("/api/auth/register", async (req, res) => {
   if (!name || !email || password.length < 8) {
     return res.status(400).json({ detail: "name, email, and password (>=8 chars) are required" });
   }
-  if (users.some((entry) => entry.email === email)) {
-    return res.status(409).json({ detail: "Email already registered" });
+
+  if (getEnv().storageMode === "memory") {
+    if (users.some((entry) => entry.email === email)) {
+      return res.status(409).json({ detail: "Email already registered" });
+    }
+    const created: AuthUser = {
+      id: randomUUID(),
+      name,
+      email,
+      passwordHash: await bcrypt.hash(password, 10),
+      onboarded: false,
+      monthlyIncome: 0,
+      primaryUse: "mixed",
+    };
+    users.push(created);
+    const token = createAuthToken(created);
+    return res.status(201).json({
+      token,
+      user: {
+        id: created.id,
+        name: created.name,
+        email: created.email,
+        onboarded: created.onboarded,
+        monthly_income: created.monthlyIncome,
+        primary_use: created.primaryUse,
+      },
+    });
   }
 
-  const created: AuthUser = {
-    id: randomUUID(),
+  const existing = await findUserByEmail(email);
+  if (existing) {
+    return res.status(409).json({ detail: "Email already registered" });
+  }
+  const created = await createUser({
     name,
     email,
     passwordHash: await bcrypt.hash(password, 10),
     onboarded: false,
     monthlyIncome: 0,
     primaryUse: "mixed",
-  };
-  users.push(created);
+  });
   const token = createAuthToken(created);
   return res.status(201).json({
     token,
@@ -673,7 +724,14 @@ app.post("/api/auth/register", async (req, res) => {
 app.post("/api/auth/login", async (req, res) => {
   const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
   const password = typeof req.body?.password === "string" ? req.body.password : "";
-  const user = users.find((entry) => entry.email === email);
+
+  let user: AuthUser | null = null;
+  if (getEnv().storageMode === "memory") {
+    user = users.find((entry) => entry.email === email) ?? null;
+  } else {
+    user = await findUserByEmail(email);
+  }
+
   if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
     return res.status(401).json({ detail: "Invalid credentials" });
   }
@@ -704,7 +762,7 @@ app.get("/api/auth/me", (req, res) => {
   });
 });
 
-app.post("/api/onboarding/complete", (req, res) => {
+app.post("/api/onboarding/complete", async (req, res) => {
   const user = requireAuth(req, res);
   if (!user) return;
   const monthlyIncome = typeof req.body?.monthly_income === "number" ? req.body.monthly_income : user.monthlyIncome;
@@ -712,10 +770,27 @@ app.post("/api/onboarding/complete", (req, res) => {
     req.body?.primary_use === "personal" || req.body?.primary_use === "freelancer" || req.body?.primary_use === "mixed"
       ? req.body.primary_use
       : user.primaryUse;
-  user.onboarded = true;
-  user.monthlyIncome = Number.isFinite(monthlyIncome) ? Math.max(0, monthlyIncome) : user.monthlyIncome;
-  user.primaryUse = primaryUse;
-  return res.json({ ok: true, onboarded: true, monthly_income: user.monthlyIncome, primary_use: user.primaryUse });
+  const nextIncome = Number.isFinite(monthlyIncome) ? Math.max(0, monthlyIncome) : user.monthlyIncome;
+  if (getEnv().storageMode === "memory") {
+    user.onboarded = true;
+    user.monthlyIncome = nextIncome;
+    user.primaryUse = primaryUse;
+    return res.json({ ok: true, onboarded: true, monthly_income: user.monthlyIncome, primary_use: user.primaryUse });
+  }
+  const updated = await updateUserById(user.id, {
+    onboarded: true,
+    monthlyIncome: nextIncome,
+    primaryUse,
+  });
+  if (!updated) {
+    return res.status(404).json({ detail: "User not found" });
+  }
+  return res.json({
+    ok: true,
+    onboarded: true,
+    monthly_income: updated.monthlyIncome,
+    primary_use: updated.primaryUse,
+  });
 });
 
 app.post("/api/transactions", async (req, res) => {
@@ -893,6 +968,7 @@ app.post("/api/budgets", (req, res) => {
     memberIds: [user.id],
   };
   budgets.unshift(created);
+  touchWorkspace();
   res.status(201).json(created);
 });
 
@@ -905,10 +981,12 @@ app.delete("/api/budgets/:id", (req, res) => {
   if (budget.ownerId === user.id) {
     if (budget.shareToken) shareIndex.delete(budget.shareToken);
     budgets.splice(index, 1);
+    touchWorkspace();
     return res.json({ ok: true });
   }
   if (!budget.memberIds.includes(user.id)) return res.status(404).json({ detail: "Budget not found" });
   budget.memberIds = budget.memberIds.filter((entry) => entry !== user.id);
+  touchWorkspace();
   return res.json({ ok: true });
 });
 
@@ -921,6 +999,7 @@ app.post("/api/budgets/:id/share", (req, res) => {
     budget.shareToken = randomUUID().replace(/-/g, "");
     shareIndex.set(budget.shareToken, { kind: "budget", resourceId: budget.id, ownerId: user.id });
   }
+  touchWorkspace();
   res.json({ token: budget.shareToken });
 });
 
@@ -932,6 +1011,7 @@ app.delete("/api/budgets/:id/share", (req, res) => {
   if (budget.shareToken) shareIndex.delete(budget.shareToken);
   budget.shareToken = undefined;
   budget.memberIds = [user.id];
+  touchWorkspace();
   res.json({ ok: true });
 });
 
@@ -989,6 +1069,7 @@ app.post("/api/goals", (req, res) => {
     memberIds: [user.id],
   };
   goals.unshift(created);
+  touchWorkspace();
   res.status(201).json(created);
 });
 
@@ -1002,6 +1083,7 @@ app.patch("/api/goals/:id", (req, res) => {
   if (typeof req.body?.target_amount === "number" && req.body.target_amount > 0) goal.targetAmount = req.body.target_amount;
   if (typeof req.body?.current_amount === "number") goal.currentAmount = Math.max(0, req.body.current_amount);
   if (typeof req.body?.monthly_contribution === "number") goal.monthlyContribution = Math.max(0, req.body.monthly_contribution);
+  touchWorkspace();
   res.json({ ok: true, goal });
 });
 
@@ -1014,10 +1096,12 @@ app.delete("/api/goals/:id", (req, res) => {
   if (goal.ownerId === user.id) {
     if (goal.shareToken) shareIndex.delete(goal.shareToken);
     goals.splice(index, 1);
+    touchWorkspace();
     return res.json({ ok: true });
   }
   if (!goal.memberIds.includes(user.id)) return res.status(404).json({ detail: "Goal not found" });
   goal.memberIds = goal.memberIds.filter((entry) => entry !== user.id);
+  touchWorkspace();
   res.json({ ok: true });
 });
 
@@ -1029,6 +1113,7 @@ app.post("/api/goals/:id/contribute", (req, res) => {
   const amount = typeof req.body?.amount === "number" ? req.body.amount : 0;
   if (amount === 0) return res.status(400).json({ detail: "amount cannot be 0" });
   goal.currentAmount = Math.max(0, goal.currentAmount + amount);
+  touchWorkspace();
   res.json({ ok: true, current_amount: goal.currentAmount });
 });
 
@@ -1039,6 +1124,7 @@ app.post("/api/goals/:id/leave", (req, res) => {
   if (!goal || !goal.memberIds.includes(user.id)) return res.status(404).json({ detail: "Goal not found" });
   if (goal.ownerId === user.id) return res.status(400).json({ detail: "Owner cannot leave own goal" });
   goal.memberIds = goal.memberIds.filter((entry) => entry !== user.id);
+  touchWorkspace();
   res.json({ ok: true });
 });
 
@@ -1051,6 +1137,7 @@ app.post("/api/goals/:id/share", (req, res) => {
     goal.shareToken = randomUUID().replace(/-/g, "");
     shareIndex.set(goal.shareToken, { kind: "goal", resourceId: goal.id, ownerId: user.id });
   }
+  touchWorkspace();
   res.json({ token: goal.shareToken });
 });
 
@@ -1062,21 +1149,28 @@ app.delete("/api/goals/:id/share", (req, res) => {
   if (goal.shareToken) shareIndex.delete(goal.shareToken);
   goal.shareToken = undefined;
   goal.memberIds = [user.id];
+  touchWorkspace();
   res.json({ ok: true });
 });
 
-app.get("/api/shares/:token", (req, res) => {
+app.get("/api/shares/:token", async (req, res) => {
   const token = req.params.token;
   const entry = shareIndex.get(token);
   if (!entry) return res.status(404).json({ detail: "Share not found" });
-  const owner = users.find((candidate) => candidate.id === entry.ownerId);
+  let ownerName = "Owner";
+  if (getEnv().storageMode === "memory") {
+    ownerName = users.find((candidate) => candidate.id === entry.ownerId)?.name ?? "Owner";
+  } else {
+    const owner = await findUserById(entry.ownerId);
+    ownerName = owner?.name ?? "Owner";
+  }
   if (entry.kind === "goal") {
     const goal = goals.find((candidate) => candidate.id === entry.resourceId);
     if (!goal) return res.status(404).json({ detail: "Share not found" });
     return res.json({
       kind: "goal",
       name: goal.name,
-      owner_name: owner?.name ?? "Owner",
+      owner_name: ownerName,
       member_count: goal.memberIds.length,
       kind_tag: goal.kind,
       current_amount: goal.currentAmount,
@@ -1089,7 +1183,7 @@ app.get("/api/shares/:token", (req, res) => {
   return res.json({
     kind: "budget",
     name: budget.name,
-    owner_name: owner?.name ?? "Owner",
+    owner_name: ownerName,
     member_count: budget.memberIds.length,
     category: budget.category,
     limit: budget.limit,
@@ -1107,11 +1201,13 @@ app.post("/api/shares/:token/join", (req, res) => {
     const goal = goals.find((candidate) => candidate.id === entry.resourceId);
     if (!goal) return res.status(404).json({ detail: "Share not found" });
     if (!goal.memberIds.includes(user.id)) goal.memberIds.push(user.id);
+    touchWorkspace();
     return res.json({ ok: true, kind: "goal" });
   }
   const budget = budgets.find((candidate) => candidate.id === entry.resourceId);
   if (!budget) return res.status(404).json({ detail: "Share not found" });
   if (!budget.memberIds.includes(user.id)) budget.memberIds.push(user.id);
+  touchWorkspace();
   return res.json({ ok: true, kind: "budget" });
 });
 
@@ -1139,6 +1235,7 @@ app.put("/api/preferences/dashboard", (req, res) => {
       : [];
   const payload = { widgets };
   dashboardPrefs.set(user.id, payload);
+  touchWorkspace();
   res.json(payload);
 });
 
@@ -1185,10 +1282,18 @@ app.get("/api/insights", async (_req, res) => {
   const txnCountThisMonth = transactions.filter(
     (tx) => dayjs(tx.date).month() === today.month() && dayjs(tx.date).year() === today.year(),
   ).length;
+  const incomeThisMonth = transactions
+    .filter(
+      (tx) =>
+        tx.flow === "income" &&
+        dayjs(tx.date).month() === today.month() &&
+        dayjs(tx.date).year() === today.year(),
+    )
+    .reduce((sum, tx) => sum + tx.amount, 0);
   res.json({
     txn_count_this_month: txnCountThisMonth,
     total_transactions: transactions.length,
-    income_this_month: 0,
+    income_this_month: Number(incomeThisMonth.toFixed(2)),
     expense_this_month: Number(model.summary.monthlyTotal.toFixed(2)),
     mom_pct: 0,
     safe_to_spend_daily: Number(model.safeToSpendDaily.toFixed(2)),
@@ -1213,13 +1318,14 @@ app.get("/api/insights/headline", async (req, res) => {
   const spentThisMonth = transactions
     .filter(
       (tx) =>
+        countsAsExpense(tx) &&
         tx.category === top.category &&
         dayjs(tx.date).month() === today.month() &&
         dayjs(tx.date).year() === today.year(),
     )
     .reduce((sum, tx) => sum + tx.amount, 0);
   const byMerchant = transactions
-    .filter((tx) => tx.category === top.category)
+    .filter((tx) => countsAsExpense(tx) && tx.category === top.category)
     .reduce<Record<string, number>>((acc, tx) => {
       acc[tx.description] = (acc[tx.description] ?? 0) + tx.amount;
       return acc;
@@ -1278,13 +1384,14 @@ app.post("/api/import", async (req, res) => {
 });
 
 app.post("/api/demo/clear", async (req, res) => {
-  if (!requireProtectedMutationAccess(req, res)) return;
+  if (!requireProtectedDemoAccess(req, res)) return;
   await replaceStore({ transactions: [], rules: [], categories: [...DEFAULT_CATEGORIES] });
   await refreshBudgetsFromRules();
   goals.splice(0, goals.length);
   acknowledgedAlertIds.clear();
   shareIndex.clear();
   dashboardPrefs.clear();
+  touchWorkspace();
   res.json({ ok: true });
 });
 
@@ -1330,9 +1437,7 @@ function clearGoalShareTokens(): void {
   }
 }
 
-function seedDemoGoalsForScenario(scenarioId: string): void {
-  const ownerId = users[0]?.id ?? "demo-user";
-  const memberIds = users.length > 0 ? users.map((u) => u.id) : [ownerId];
+function seedDemoGoalsForScenario(scenarioId: string, ownerId: string, memberIds: string[]): void {
   if (scenarioId === "freelancer-month") {
     goals.push(
       {
@@ -1356,6 +1461,7 @@ function seedDemoGoalsForScenario(scenarioId: string): void {
         memberIds,
       },
     );
+    touchWorkspace();
     return;
   }
   if (scenarioId === "household-side-hustle") {
@@ -1381,17 +1487,18 @@ function seedDemoGoalsForScenario(scenarioId: string): void {
         memberIds,
       },
     );
+    touchWorkspace();
   }
 }
 
 app.post("/api/demo/load-scenario", async (req, res) => {
-  if (!requireProtectedMutationAccess(req, res)) return;
+  if (!requireProtectedDemoAccess(req, res)) return;
   const id = typeof req.body?.scenario === "string" ? req.body.scenario.trim() : "";
   if (!DEMO_SCENARIO_IDS.includes(id as (typeof DEMO_SCENARIO_IDS)[number])) {
     return res.status(400).json({ error: "Unknown scenario" });
   }
   try {
-    const file = join(process.cwd(), "..", "scenarios", id, "import.json");
+    const file = join(process.cwd(), "demo-scenarios", `${id}.json`);
     const raw = JSON.parse(readFileSync(file, "utf8")) as unknown;
     const targetLast = dayjs().subtract(1, "day").format("YYYY-MM-DD");
     const body = alignScenarioFileDatesForDemoLoad(raw, targetLast);
@@ -1400,8 +1507,13 @@ app.post("/api/demo/load-scenario", async (req, res) => {
     if (id === "freelancer-month" || id === "household-side-hustle") {
       clearGoalShareTokens();
       goals.splice(0, goals.length);
-      seedDemoGoalsForScenario(id);
+      const ownerId =
+        getEnv().storageMode === "memory" ? (users[0]?.id ?? "demo-user") : await getDefaultOwnerUserId();
+      const memberIds =
+        getEnv().storageMode === "memory" && users.length > 0 ? users.map((u) => u.id) : [ownerId];
+      seedDemoGoalsForScenario(id, ownerId, memberIds);
     }
+    touchWorkspace();
     res.json({ ok: true, scenario: id });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to load scenario";
@@ -1410,7 +1522,7 @@ app.post("/api/demo/load-scenario", async (req, res) => {
 });
 
 app.post("/api/demo/seed", async (req, res) => {
-  if (!requireProtectedMutationAccess(req, res)) return;
+  if (!requireProtectedDemoAccess(req, res)) return;
   const categories = await listCategories();
   const now = new Date().toISOString().slice(0, 10);
   await replaceStore({
@@ -1420,6 +1532,7 @@ app.post("/api/demo/seed", async (req, res) => {
       {
         date: now,
         amount: 58.5,
+        flow: "expense",
         category: "Food",
         description: "Cafe lunch",
         normalizedMerchant: normalizeMerchant("Cafe lunch"),
@@ -1428,6 +1541,7 @@ app.post("/api/demo/seed", async (req, res) => {
       {
         date: now,
         amount: 120,
+        flow: "expense",
         category: "Transport",
         description: "MTR refill",
         normalizedMerchant: normalizeMerchant("MTR refill"),
@@ -1452,6 +1566,7 @@ app.post("/api/generate-test-data", async (req, res) => {
     return {
       date: date.toISOString().slice(0, 10),
       amount: Number((Math.random() * 120 + 10).toFixed(2)),
+      flow: "expense",
       category: categories[index % categories.length],
       description,
       normalizedMerchant: normalizeMerchant(description),

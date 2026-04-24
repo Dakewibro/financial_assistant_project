@@ -6,9 +6,18 @@ export function normalizeTransactionRow(t) {
   if (!t) return t;
   const merchant = t.merchant ?? t.description ?? "";
   const account = t.account ?? t.scope ?? "personal";
-  const type = t.type ?? (typeof t.amount === "number" && t.amount < 0 ? "income" : "expense");
+  let flow = t.flow === "income" || t.flow === "expense" ? t.flow : null;
+  let amount = typeof t.amount === "number" ? t.amount : t.amount;
+  if (flow == null && typeof amount === "number" && amount < 0) {
+    flow = "income";
+    amount = Math.abs(amount);
+  }
+  flow = flow ?? "expense";
+  const type = t.type ?? (flow === "income" ? "income" : "expense");
   return {
     ...t,
+    amount,
+    flow,
     merchant,
     account,
     type,

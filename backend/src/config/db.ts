@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import { getEnv } from "./env.js";
+import { ensureDemoUserSeeded } from "../userRepository.js";
+import { hydrateWorkspaceFromMongo } from "../workspacePersistence.js";
 
 let databaseReady = false;
 
@@ -21,6 +23,8 @@ export async function connectDatabase(): Promise<void> {
   await mongoose.connect(env.mongodbUri, {
     dbName: env.mongodbDb,
   });
+  await ensureDemoUserSeeded();
+  await hydrateWorkspaceFromMongo();
   databaseReady = true;
 }
 
