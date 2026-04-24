@@ -1,3 +1,4 @@
+import { adminSecretsEqual, normalizeClientAdminToken, readAdminTokenFromRequest } from "./utils/adminToken.js";
 import cors from "cors";
 import express from "express";
 import { readFileSync } from "node:fs";
@@ -212,10 +213,21 @@ export function validateProtectedMutationAccess(providedToken: string | undefine
     };
   }
 
-  if (providedToken?.trim() !== adminApiToken) {
+  const client = normalizeClientAdminToken(providedToken);
+  if (!client) {
     return {
       allowed: false,
-      error: "Protected mutation endpoint requires a valid x-admin-token header",
+      error:
+        "Missing or empty x-admin-token header. Send header x-admin-token (or admin-token) with the same raw value as the server ADMIN_API_TOKEN.",
+      status: 403,
+    };
+  }
+
+  if (!adminSecretsEqual(adminApiToken, client)) {
+    return {
+      allowed: false,
+      error:
+        "x-admin-token does not match ADMIN_API_TOKEN (different value, environment, or project). Use the exact secret from this API host; do not URL-encode unless you mean to.",
       status: 403,
     };
   }
@@ -224,19 +236,21 @@ export function validateProtectedMutationAccess(providedToken: string | undefine
 }
 
 function requireProtectedMutationAccess(req: express.Request, res: express.Response): boolean {
-  const access = validateProtectedMutationAccess(req.get("x-admin-token"));
+  const access = validateProtectedMutationAccess(readAdminTokenFromRequest(req));
   if (access.allowed) return true;
   res.status(access.status ?? 403).json({ error: access.error });
   return false;
 }
 
 /**
- * Demo load/clear/seed: in production Mongo, requires `DEMO_MUTATIONS_ENABLED=true` plus a signed-in user,
- * or a valid `x-admin-token`. Import / generate-test-data stay admin-gated via `requireProtectedMutationAccess`.
+ * Demo load/clear/seed: if `demoMutationsEnabled` (default true), any **signed-in** user may run them on Mongo.
+ * If `DEMO_MUTATIONS_ENABLED=false`, only `x-admin-token` works. Unauthenticated callers always need the token.
+ * Import / generate-test-data stay admin-gated via `requireProtectedMutationAccess`.
  */
 function requireProtectedDemoAccess(req: express.Request, res: express.Response): boolean {
   if (getEnv().storageMode === "memory") return true;
-  if (getEnv().demoMutationsEnabled && getAuthUser(req)) return true;
+  if (!getEnv().demoMutationsEnabled) return requireProtectedMutationAccess(req, res);
+  if (getAuthUser(req)) return true;
   return requireProtectedMutationAccess(req, res);
 }
 

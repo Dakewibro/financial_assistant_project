@@ -1,11 +1,11 @@
 # Graph Report - financial_assistant_project  (2026-04-24)
 
 ## Corpus Check
-- 113 files · ~92,225 words
+- 113 files · ~94,249 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 335 nodes · 470 edges · 13 communities detected
+- 335 nodes · 469 edges · 13 communities detected
 - Extraction: 77% EXTRACTED · 23% INFERRED · 0% AMBIGUOUS · INFERRED: 106 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 

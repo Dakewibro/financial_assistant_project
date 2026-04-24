@@ -24,7 +24,7 @@ If this Render service existed before the current blueprint settings were added,
 - `MONGODB_DB=financial_assistant`
 - `ALLOWED_ORIGINS=<your frontend URL>`
 - `AUTH_ENFORCED` — on production hosts (`NODE_ENV=production` or `VERCEL=1`) the API defaults to requiring a Bearer token on enforced routes. Set `AUTH_ENFORCED=false` only for trusted private demos.
-- `DEMO_MUTATIONS_ENABLED` — demo load/clear/seed default **off** in production (shared Mongo). Set `DEMO_MUTATIONS_ENABLED=true` so logged-in users can run demos without `x-admin-token`, or keep it off and use `x-admin-token` with `ADMIN_API_TOKEN`.
+- `DEMO_MUTATIONS_ENABLED` — defaults **on**: logged-in users can run demo load/clear/seed without `x-admin-token`. Set `DEMO_MUTATIONS_ENABLED=false` on the API if you want only operators (with `x-admin-token`) to run those routes on a shared Mongo host.
 
 Example:
 

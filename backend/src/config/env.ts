@@ -1,3 +1,5 @@
+import { normalizeStoredAdminToken } from "../utils/adminToken.js";
+
 export type StorageMode = "mongo" | "memory";
 
 const DEV_DEFAULT_JWT_SECRET = "dev-local-jwt-secret";
@@ -25,18 +27,20 @@ function parseAuthEnforced(): boolean {
   return isDeployProduction();
 }
 
-/** Demo load/clear/seed: off by default on Vercel/production unless explicitly enabled (shared Mongo safety). */
+/**
+ * Demo load/clear/seed: **on** by default (any logged-in user may run them; see `requireProtectedDemoAccess`).
+ * Set `DEMO_MUTATIONS_ENABLED=false` on the API host to require `x-admin-token` for those routes (stricter shared Mongo).
+ */
 function parseDemoMutationsEnabled(): boolean {
   const raw = process.env.DEMO_MUTATIONS_ENABLED?.trim().toLowerCase();
-  if (raw === "true" || raw === "1") return true;
   if (raw === "false" || raw === "0") return false;
-  return !isDeployProduction();
+  return true;
 }
 
 export function getEnv() {
   const mongodbUri = process.env.MONGODB_URI?.trim() ?? "";
   const requestedStorageMode = process.env.STORAGE_MODE === "memory" ? "memory" : "mongo";
-  const adminApiToken = process.env.ADMIN_API_TOKEN?.trim() ?? "";
+  const adminApiToken = normalizeStoredAdminToken(process.env.ADMIN_API_TOKEN ?? "");
 
   if (requestedStorageMode === "mongo" && process.env.STORAGE_MODE === "mongo" && mongodbUri.length === 0) {
     throw new Error("MONGODB_URI is required when STORAGE_MODE=mongo");

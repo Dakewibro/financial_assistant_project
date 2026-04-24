@@ -26,9 +26,42 @@ describe("protected mutation access", () => {
 
     expect(validateProtectedMutationAccess("wrong-secret")).toEqual({
       allowed: false,
-      error: "Protected mutation endpoint requires a valid x-admin-token header",
+      error:
+        "x-admin-token does not match ADMIN_API_TOKEN (different value, environment, or project). Use the exact secret from this API host; do not URL-encode unless you mean to.",
       status: 403,
     });
+  });
+
+  it("treats missing header as empty after normalize", () => {
+    process.env.STORAGE_MODE = "mongo";
+    process.env.MONGODB_URI = "mongodb://example.test/financial_assistant";
+    process.env.ADMIN_API_TOKEN = "expected-secret";
+
+    expect(validateProtectedMutationAccess(undefined)).toEqual({
+      allowed: false,
+      error:
+        "Missing or empty x-admin-token header. Send header x-admin-token (or admin-token) with the same raw value as the server ADMIN_API_TOKEN.",
+      status: 403,
+    });
+    expect(validateProtectedMutationAccess("   ")).toEqual({
+      allowed: false,
+      error:
+        "Missing or empty x-admin-token header. Send header x-admin-token (or admin-token) with the same raw value as the server ADMIN_API_TOKEN.",
+      status: 403,
+    });
+  });
+
+  it("accepts leading BOM, wrapping quotes, and accidental URI-encoding on the client token", () => {
+    process.env.STORAGE_MODE = "mongo";
+    process.env.MONGODB_URI = "mongodb://example.test/financial_assistant";
+    process.env.ADMIN_API_TOKEN = "expected-secret";
+
+    expect(validateProtectedMutationAccess("\ufeffexpected-secret").allowed).toBe(true);
+    expect(validateProtectedMutationAccess('"expected-secret"').allowed).toBe(true);
+    expect(validateProtectedMutationAccess("'expected-secret'").allowed).toBe(true);
+
+    process.env.ADMIN_API_TOKEN = "hello world";
+    expect(validateProtectedMutationAccess(encodeURIComponent("hello world")).allowed).toBe(true);
   });
 });
 
