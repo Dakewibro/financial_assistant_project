@@ -1,7 +1,7 @@
 # Graph Report - financial_assistant_project  (2026-04-24)
 
 ## Corpus Check
-- 107 files · ~89,817 words
+- 107 files · ~89,863 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary

@@ -5,8 +5,8 @@ import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
+import * as helmetModule from "helmet";
+import { rateLimit } from "express-rate-limit";
 import { slowDown } from "express-slow-down";
 import { evaluateAlerts } from "./alertService.js";
 import { isDatabaseReady } from "./config/db.js";
@@ -477,7 +477,7 @@ function buildInsightsPayload(transactions: Transaction[], rules: BudgetRule[]) 
 
 export const app = express();
 app.use(
-  helmet({
+  helmetModule.default({
     contentSecurityPolicy: false,
   }),
 );
