@@ -9,7 +9,7 @@
       "source_file": "frontend/vite.config.mjs",
       "source_location": "L1",
       "id": "frontend_vite_config_mjs",
-      "community": 18,
+      "community": 16,
       "norm_label": "vite.config.mjs"
     },
     {
@@ -18,7 +18,7 @@
       "source_file": "frontend/vite.config.mjs",
       "source_location": "L12",
       "id": "vite_config_manualchunks",
-      "community": 18,
+      "community": 16,
       "norm_label": "manualchunks()"
     },
     {
@@ -27,7 +27,7 @@
       "source_file": "frontend/src/main.jsx",
       "source_location": "L1",
       "id": "frontend_src_main_jsx",
-      "community": 29,
+      "community": 27,
       "norm_label": "main.jsx"
     },
     {
@@ -117,7 +117,7 @@
       "source_file": "frontend/src/components/ShareDialog.js",
       "source_location": "L1",
       "id": "frontend_src_components_sharedialog_js",
-      "community": 19,
+      "community": 17,
       "norm_label": "sharedialog.js"
     },
     {
@@ -126,7 +126,7 @@
       "source_file": "frontend/src/components/ShareDialog.js",
       "source_location": "L9",
       "id": "sharedialog_sharedialog",
-      "community": 19,
+      "community": 17,
       "norm_label": "sharedialog()"
     },
     {
@@ -153,7 +153,7 @@
       "source_file": "frontend/src/components/QuickAddDialog.js",
       "source_location": "L1",
       "id": "frontend_src_components_quickadddialog_js",
-      "community": 13,
+      "community": 11,
       "norm_label": "quickadddialog.js"
     },
     {
@@ -162,7 +162,7 @@
       "source_file": "frontend/src/components/QuickAddDialog.js",
       "source_location": "L41",
       "id": "quickadddialog_todayisodate",
-      "community": 13,
+      "community": 11,
       "norm_label": "todayisodate()"
     },
     {
@@ -171,7 +171,7 @@
       "source_file": "frontend/src/components/QuickAddDialog.js",
       "source_location": "L45",
       "id": "quickadddialog_autosourcedescription",
-      "community": 13,
+      "community": 11,
       "norm_label": "autosourcedescription()"
     },
     {
@@ -180,7 +180,7 @@
       "source_file": "frontend/src/components/QuickAddDialog.js",
       "source_location": "L52",
       "id": "quickadddialog_buildcreatetransactionbody",
-      "community": 13,
+      "community": 11,
       "norm_label": "buildcreatetransactionbody()"
     },
     {
@@ -189,7 +189,7 @@
       "source_file": "frontend/src/components/QuickAddDialog.js",
       "source_location": "L64",
       "id": "quickadddialog_categorypicker",
-      "community": 13,
+      "community": 11,
       "norm_label": "categorypicker()"
     },
     {
@@ -198,7 +198,7 @@
       "source_file": "frontend/src/components/QuickAddDialog.js",
       "source_location": "L190",
       "id": "quickadddialog_quickadddialog",
-      "community": 13,
+      "community": 11,
       "norm_label": "quickadddialog()"
     },
     {
@@ -207,7 +207,7 @@
       "source_file": "frontend/src/components/QuickAddImportPanel.js",
       "source_location": "L1",
       "id": "frontend_src_components_quickaddimportpanel_js",
-      "community": 10,
+      "community": 0,
       "norm_label": "quickaddimportpanel.js"
     },
     {
@@ -216,7 +216,7 @@
       "source_file": "frontend/src/components/QuickAddImportPanel.js",
       "source_location": "L34",
       "id": "quickaddimportpanel_sniffformat",
-      "community": 10,
+      "community": 0,
       "norm_label": "sniffformat()"
     },
     {
@@ -225,7 +225,7 @@
       "source_file": "frontend/src/components/QuickAddImportPanel.js",
       "source_location": "L44",
       "id": "quickaddimportpanel_headerfingerprint",
-      "community": 10,
+      "community": 0,
       "norm_label": "headerfingerprint()"
     },
     {
@@ -234,7 +234,7 @@
       "source_file": "frontend/src/components/QuickAddImportPanel.js",
       "source_location": "L48",
       "id": "quickaddimportpanel_loadcolumnoverrides",
-      "community": 10,
+      "community": 0,
       "norm_label": "loadcolumnoverrides()"
     },
     {
@@ -243,7 +243,7 @@
       "source_file": "frontend/src/components/QuickAddImportPanel.js",
       "source_location": "L57",
       "id": "quickaddimportpanel_savecolumnoverrides",
-      "community": 10,
+      "community": 0,
       "norm_label": "savecolumnoverrides()"
     },
     {
@@ -252,7 +252,7 @@
       "source_file": "frontend/src/components/QuickAddImportPanel.js",
       "source_location": "L67",
       "id": "quickaddimportpanel_statusicon",
-      "community": 10,
+      "community": 0,
       "norm_label": "statusicon()"
     },
     {
@@ -261,7 +261,7 @@
       "source_file": "frontend/src/components/QuickAddImportPanel.js",
       "source_location": "L74",
       "id": "quickaddimportpanel_quickaddimportpanel",
-      "community": 10,
+      "community": 0,
       "norm_label": "quickaddimportpanel()"
     },
     {
@@ -369,7 +369,7 @@
       "source_file": "frontend/src/components/ui/menubar.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_menubar_jsx",
-      "community": 11,
+      "community": 10,
       "norm_label": "menubar.jsx"
     },
     {
@@ -378,7 +378,7 @@
       "source_file": "frontend/src/components/ui/menubar.jsx",
       "source_location": "L7",
       "id": "menubar_menubarmenu",
-      "community": 11,
+      "community": 10,
       "norm_label": "menubarmenu()"
     },
     {
@@ -387,7 +387,7 @@
       "source_file": "frontend/src/components/ui/menubar.jsx",
       "source_location": "L13",
       "id": "menubar_menubargroup",
-      "community": 11,
+      "community": 10,
       "norm_label": "menubargroup()"
     },
     {
@@ -396,7 +396,7 @@
       "source_file": "frontend/src/components/ui/menubar.jsx",
       "source_location": "L19",
       "id": "menubar_menubarportal",
-      "community": 11,
+      "community": 10,
       "norm_label": "menubarportal()"
     },
     {
@@ -405,7 +405,7 @@
       "source_file": "frontend/src/components/ui/menubar.jsx",
       "source_location": "L25",
       "id": "menubar_menubarradiogroup",
-      "community": 11,
+      "community": 10,
       "norm_label": "menubarradiogroup()"
     },
     {
@@ -414,7 +414,7 @@
       "source_file": "frontend/src/components/ui/menubar.jsx",
       "source_location": "L31",
       "id": "menubar_menubarsub",
-      "community": 11,
+      "community": 10,
       "norm_label": "menubarsub()"
     },
     {
@@ -423,7 +423,7 @@
       "source_file": "frontend/src/components/ui/menubar.jsx",
       "source_location": "L169",
       "id": "menubar_menubarshortcut",
-      "community": 11,
+      "community": 10,
       "norm_label": "menubarshortcut()"
     },
     {
@@ -432,7 +432,7 @@
       "source_file": "frontend/src/components/ui/avatar.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_avatar_jsx",
-      "community": 30,
+      "community": 28,
       "norm_label": "avatar.jsx"
     },
     {
@@ -441,7 +441,7 @@
       "source_file": "frontend/src/components/ui/toggle-group.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_toggle_group_jsx",
-      "community": 31,
+      "community": 29,
       "norm_label": "toggle-group.jsx"
     },
     {
@@ -477,7 +477,7 @@
       "source_file": "frontend/src/components/ui/radio-group.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_radio_group_jsx",
-      "community": 32,
+      "community": 30,
       "norm_label": "radio-group.jsx"
     },
     {
@@ -531,7 +531,7 @@
       "source_file": "frontend/src/components/ui/switch.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_switch_jsx",
-      "community": 33,
+      "community": 31,
       "norm_label": "switch.jsx"
     },
     {
@@ -540,7 +540,7 @@
       "source_file": "frontend/src/components/ui/carousel.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_carousel_jsx",
-      "community": 20,
+      "community": 18,
       "norm_label": "carousel.jsx"
     },
     {
@@ -549,7 +549,7 @@
       "source_file": "frontend/src/components/ui/carousel.jsx",
       "source_location": "L10",
       "id": "carousel_usecarousel",
-      "community": 20,
+      "community": 18,
       "norm_label": "usecarousel()"
     },
     {
@@ -558,7 +558,7 @@
       "source_file": "frontend/src/components/ui/form.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_form_jsx",
-      "community": 15,
+      "community": 13,
       "norm_label": "form.jsx"
     },
     {
@@ -567,7 +567,7 @@
       "source_file": "frontend/src/components/ui/form.jsx",
       "source_location": "L12",
       "id": "form_formfield",
-      "community": 15,
+      "community": 13,
       "norm_label": "formfield()"
     },
     {
@@ -576,7 +576,7 @@
       "source_file": "frontend/src/components/ui/form.jsx",
       "source_location": "L24",
       "id": "form_useformfield",
-      "community": 15,
+      "community": 13,
       "norm_label": "useformfield()"
     },
     {
@@ -621,7 +621,7 @@
       "source_file": "frontend/src/components/ui/input.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_input_jsx",
-      "community": 34,
+      "community": 32,
       "norm_label": "input.jsx"
     },
     {
@@ -630,7 +630,7 @@
       "source_file": "frontend/src/components/ui/textarea.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_textarea_jsx",
-      "community": 35,
+      "community": 33,
       "norm_label": "textarea.jsx"
     },
     {
@@ -639,7 +639,7 @@
       "source_file": "frontend/src/components/ui/select.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_select_jsx",
-      "community": 36,
+      "community": 34,
       "norm_label": "select.jsx"
     },
     {
@@ -666,7 +666,7 @@
       "source_file": "frontend/src/components/ui/collapsible.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_collapsible_jsx",
-      "community": 37,
+      "community": 35,
       "norm_label": "collapsible.jsx"
     },
     {
@@ -675,7 +675,7 @@
       "source_file": "frontend/src/components/ui/checkbox.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_checkbox_jsx",
-      "community": 38,
+      "community": 36,
       "norm_label": "checkbox.jsx"
     },
     {
@@ -684,7 +684,7 @@
       "source_file": "frontend/src/components/ui/toast.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_toast_jsx",
-      "community": 39,
+      "community": 37,
       "norm_label": "toast.jsx"
     },
     {
@@ -693,7 +693,7 @@
       "source_file": "frontend/src/components/ui/toggle.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_toggle_jsx",
-      "community": 40,
+      "community": 38,
       "norm_label": "toggle.jsx"
     },
     {
@@ -702,7 +702,7 @@
       "source_file": "frontend/src/components/ui/button.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_button_jsx",
-      "community": 41,
+      "community": 39,
       "norm_label": "button.jsx"
     },
     {
@@ -711,7 +711,7 @@
       "source_file": "frontend/src/components/ui/separator.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_separator_jsx",
-      "community": 42,
+      "community": 40,
       "norm_label": "separator.jsx"
     },
     {
@@ -720,7 +720,7 @@
       "source_file": "frontend/src/components/ui/table.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_table_jsx",
-      "community": 43,
+      "community": 41,
       "norm_label": "table.jsx"
     },
     {
@@ -747,7 +747,7 @@
       "source_file": "frontend/src/components/ui/input-otp.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_input_otp_jsx",
-      "community": 44,
+      "community": 42,
       "norm_label": "input-otp.jsx"
     },
     {
@@ -774,7 +774,7 @@
       "source_file": "frontend/src/components/ui/progress.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_progress_jsx",
-      "community": 45,
+      "community": 43,
       "norm_label": "progress.jsx"
     },
     {
@@ -783,7 +783,7 @@
       "source_file": "frontend/src/components/ui/popover.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_popover_jsx",
-      "community": 46,
+      "community": 44,
       "norm_label": "popover.jsx"
     },
     {
@@ -792,7 +792,7 @@
       "source_file": "frontend/src/components/ui/slider.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_slider_jsx",
-      "community": 47,
+      "community": 45,
       "norm_label": "slider.jsx"
     },
     {
@@ -801,7 +801,7 @@
       "source_file": "frontend/src/components/ui/card.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_card_jsx",
-      "community": 48,
+      "community": 46,
       "norm_label": "card.jsx"
     },
     {
@@ -810,7 +810,7 @@
       "source_file": "frontend/src/components/ui/tabs.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_tabs_jsx",
-      "community": 49,
+      "community": 47,
       "norm_label": "tabs.jsx"
     },
     {
@@ -900,7 +900,7 @@
       "source_file": "frontend/src/components/ui/aspect-ratio.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_aspect_ratio_jsx",
-      "community": 50,
+      "community": 48,
       "norm_label": "aspect-ratio.jsx"
     },
     {
@@ -909,7 +909,7 @@
       "source_file": "frontend/src/components/ui/alert.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_alert_jsx",
-      "community": 51,
+      "community": 49,
       "norm_label": "alert.jsx"
     },
     {
@@ -918,7 +918,7 @@
       "source_file": "frontend/src/components/ui/tooltip.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_tooltip_jsx",
-      "community": 52,
+      "community": 50,
       "norm_label": "tooltip.jsx"
     },
     {
@@ -963,7 +963,7 @@
       "source_file": "frontend/src/components/ui/accordion.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_accordion_jsx",
-      "community": 53,
+      "community": 51,
       "norm_label": "accordion.jsx"
     },
     {
@@ -972,7 +972,7 @@
       "source_file": "frontend/src/components/ui/navigation-menu.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_navigation_menu_jsx",
-      "community": 54,
+      "community": 52,
       "norm_label": "navigation-menu.jsx"
     },
     {
@@ -981,7 +981,7 @@
       "source_file": "frontend/src/components/ui/sonner.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_sonner_jsx",
-      "community": 21,
+      "community": 19,
       "norm_label": "sonner.jsx"
     },
     {
@@ -990,7 +990,7 @@
       "source_file": "frontend/src/components/ui/sonner.jsx",
       "source_location": "L4",
       "id": "sonner_toaster",
-      "community": 21,
+      "community": 19,
       "norm_label": "toaster()"
     },
     {
@@ -999,7 +999,7 @@
       "source_file": "frontend/src/components/ui/label.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_label_jsx",
-      "community": 55,
+      "community": 53,
       "norm_label": "label.jsx"
     },
     {
@@ -1035,7 +1035,7 @@
       "source_file": "frontend/src/components/ui/scroll-area.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_scroll_area_jsx",
-      "community": 56,
+      "community": 54,
       "norm_label": "scroll-area.jsx"
     },
     {
@@ -1071,7 +1071,7 @@
       "source_file": "frontend/src/components/ui/hover-card.jsx",
       "source_location": "L1",
       "id": "frontend_src_components_ui_hover_card_jsx",
-      "community": 57,
+      "community": 55,
       "norm_label": "hover-card.jsx"
     },
     {
@@ -1161,7 +1161,7 @@
       "source_file": "frontend/src/components/widgets/SortableWidget.js",
       "source_location": "L1",
       "id": "frontend_src_components_widgets_sortablewidget_js",
-      "community": 14,
+      "community": 12,
       "norm_label": "sortablewidget.js"
     },
     {
@@ -1170,7 +1170,7 @@
       "source_file": "frontend/src/components/widgets/SortableWidget.js",
       "source_location": "L18",
       "id": "sortablewidget_dashboarddragpreview",
-      "community": 14,
+      "community": 12,
       "norm_label": "dashboarddragpreview()"
     },
     {
@@ -1179,7 +1179,7 @@
       "source_file": "frontend/src/components/widgets/SortableWidget.js",
       "source_location": "L28",
       "id": "sortablewidget_sortablewidget",
-      "community": 14,
+      "community": 12,
       "norm_label": "sortablewidget()"
     },
     {
@@ -1188,7 +1188,7 @@
       "source_file": "frontend/src/components/widgets/SortableWidget.js",
       "source_location": "L113",
       "id": "sortablewidget_sizebutton",
-      "community": 14,
+      "community": 12,
       "norm_label": "sizebutton()"
     },
     {
@@ -1260,7 +1260,7 @@
       "source_file": "frontend/src/lib/transactionShape.js",
       "source_location": "L1",
       "id": "frontend_src_lib_transactionshape_js",
-      "community": 16,
+      "community": 14,
       "norm_label": "transactionshape.js"
     },
     {
@@ -1269,7 +1269,7 @@
       "source_file": "frontend/src/lib/transactionShape.js",
       "source_location": "L5",
       "id": "transactionshape_normalizetransactionrow",
-      "community": 16,
+      "community": 14,
       "norm_label": "normalizetransactionrow()"
     },
     {
@@ -1278,7 +1278,7 @@
       "source_file": "frontend/src/lib/transactionShape.js",
       "source_location": "L20",
       "id": "transactionshape_normalizetransactionlist",
-      "community": 16,
+      "community": 14,
       "norm_label": "normalizetransactionlist()"
     },
     {
@@ -1341,7 +1341,7 @@
       "source_file": "frontend/src/lib/appEvents.js",
       "source_location": "L1",
       "id": "frontend_src_lib_appevents_js",
-      "community": 22,
+      "community": 20,
       "norm_label": "appevents.js"
     },
     {
@@ -1350,7 +1350,7 @@
       "source_file": "frontend/src/lib/appEvents.js",
       "source_location": "L4",
       "id": "appevents_invalidatealertcount",
-      "community": 22,
+      "community": 20,
       "norm_label": "invalidatealertcount()"
     },
     {
@@ -1377,7 +1377,7 @@
       "source_file": "frontend/src/lib/api.js",
       "source_location": "L1",
       "id": "frontend_src_lib_api_js",
-      "community": 23,
+      "community": 21,
       "norm_label": "api.js"
     },
     {
@@ -1386,7 +1386,7 @@
       "source_file": "frontend/src/lib/api.js",
       "source_location": "L18",
       "id": "api_formatapierror",
-      "community": 23,
+      "community": 21,
       "norm_label": "formatapierror()"
     },
     {
@@ -1395,7 +1395,7 @@
       "source_file": "frontend/src/pages 2/GoalsPage 2.tsx",
       "source_location": "L1",
       "id": "frontend_src_pages_2_goalspage_2_tsx",
-      "community": 17,
+      "community": 15,
       "norm_label": "goalspage 2.tsx"
     },
     {
@@ -1404,7 +1404,7 @@
       "source_file": "frontend/src/pages 2/GoalsPage 2.tsx",
       "source_location": "L44",
       "id": "goalspage_2_formathkd",
-      "community": 17,
+      "community": 15,
       "norm_label": "formathkd()"
     },
     {
@@ -1413,7 +1413,7 @@
       "source_file": "frontend/src/pages 2/GoalsPage 2.tsx",
       "source_location": "L55",
       "id": "goalspage_2_async",
-      "community": 17,
+      "community": 15,
       "norm_label": "async()"
     },
     {
@@ -1422,7 +1422,7 @@
       "source_file": "frontend/src/pages 2/SettingsPage 2.tsx",
       "source_location": "L1",
       "id": "frontend_src_pages_2_settingspage_2_tsx",
-      "community": 24,
+      "community": 22,
       "norm_label": "settingspage 2.tsx"
     },
     {
@@ -1431,7 +1431,7 @@
       "source_file": "frontend/src/pages 2/SettingsPage 2.tsx",
       "source_location": "L4",
       "id": "settingspage_2_settingspage",
-      "community": 24,
+      "community": 22,
       "norm_label": "settingspage()"
     },
     {
@@ -1440,7 +1440,7 @@
       "source_file": "frontend/src/pages 2/AlertsPage 2.tsx",
       "source_location": "L1",
       "id": "frontend_src_pages_2_alertspage_2_tsx",
-      "community": 25,
+      "community": 23,
       "norm_label": "alertspage 2.tsx"
     },
     {
@@ -1449,7 +1449,7 @@
       "source_file": "frontend/src/pages 2/AlertsPage 2.tsx",
       "source_location": "L5",
       "id": "alertspage_2_alertspage",
-      "community": 25,
+      "community": 23,
       "norm_label": "alertspage()"
     },
     {
@@ -1458,7 +1458,7 @@
       "source_file": "frontend/src/pages 2/RecurringPage 2.tsx",
       "source_location": "L1",
       "id": "frontend_src_pages_2_recurringpage_2_tsx",
-      "community": 58,
+      "community": 56,
       "norm_label": "recurringpage 2.tsx"
     },
     {
@@ -1467,7 +1467,7 @@
       "source_file": "frontend/src/pages 2/InsightsPage 2.tsx",
       "source_location": "L1",
       "id": "frontend_src_pages_2_insightspage_2_tsx",
-      "community": 26,
+      "community": 24,
       "norm_label": "insightspage 2.tsx"
     },
     {
@@ -1476,7 +1476,7 @@
       "source_file": "frontend/src/pages 2/InsightsPage 2.tsx",
       "source_location": "L6",
       "id": "insightspage_2_insightspage",
-      "community": 26,
+      "community": 24,
       "norm_label": "insightspage()"
     },
     {
@@ -1575,7 +1575,7 @@
       "source_file": "frontend/src/pages/Alerts.js",
       "source_location": "L1",
       "id": "frontend_src_pages_alerts_js",
-      "community": 27,
+      "community": 25,
       "norm_label": "alerts.js"
     },
     {
@@ -1584,7 +1584,7 @@
       "source_file": "frontend/src/pages/Alerts.js",
       "source_location": "L11",
       "id": "alerts_alerts",
-      "community": 27,
+      "community": 25,
       "norm_label": "alerts()"
     },
     {
@@ -1746,7 +1746,7 @@
       "source_file": "frontend/src/pages/Budgets.js",
       "source_location": "L1",
       "id": "frontend_src_pages_budgets_js",
-      "community": 28,
+      "community": 26,
       "norm_label": "budgets.js"
     },
     {
@@ -1755,7 +1755,7 @@
       "source_file": "frontend/src/pages/Budgets.js",
       "source_location": "L17",
       "id": "budgets_budgets",
-      "community": 28,
+      "community": 26,
       "norm_label": "budgets()"
     },
     {
@@ -1809,7 +1809,7 @@
       "source_file": "backend/tests/bootstrap.integration.test.ts",
       "source_location": "L1",
       "id": "backend_tests_bootstrap_integration_test_ts",
-      "community": 59,
+      "community": 57,
       "norm_label": "bootstrap.integration.test.ts"
     },
     {
@@ -1899,8 +1899,17 @@
       "source_file": "backend/tests/categorySuggestion.test.ts",
       "source_location": "L1",
       "id": "backend_tests_categorysuggestion_test_ts",
-      "community": 2,
+      "community": 6,
       "norm_label": "categorysuggestion.test.ts"
+    },
+    {
+      "label": "index.ts",
+      "file_type": "code",
+      "source_file": "backend/api/index.ts",
+      "source_location": "L1",
+      "id": "backend_api_index_ts",
+      "community": 1,
+      "norm_label": "index.ts"
     },
     {
       "label": "validation.ts",
@@ -2088,7 +2097,7 @@
       "source_file": "backend/src/alertService.ts",
       "source_location": "L1",
       "id": "backend_src_alertservice_ts",
-      "community": 12,
+      "community": 2,
       "norm_label": "alertservice.ts"
     },
     {
@@ -2097,7 +2106,7 @@
       "source_file": "backend/src/alertService.ts",
       "source_location": "L8",
       "id": "alertservice_createalert",
-      "community": 12,
+      "community": 2,
       "norm_label": "createalert()"
     },
     {
@@ -2106,7 +2115,7 @@
       "source_file": "backend/src/alertService.ts",
       "source_location": "L26",
       "id": "alertservice_filterbyscope",
-      "community": 12,
+      "community": 2,
       "norm_label": "filterbyscope()"
     },
     {
@@ -2115,7 +2124,7 @@
       "source_file": "backend/src/alertService.ts",
       "source_location": "L31",
       "id": "alertservice_filterbyperiod",
-      "community": 12,
+      "community": 2,
       "norm_label": "filterbyperiod()"
     },
     {
@@ -2124,7 +2133,7 @@
       "source_file": "backend/src/alertService.ts",
       "source_location": "L41",
       "id": "alertservice_buildcapalerts",
-      "community": 12,
+      "community": 2,
       "norm_label": "buildcapalerts()"
     },
     {
@@ -2133,7 +2142,7 @@
       "source_file": "backend/src/alertService.ts",
       "source_location": "L70",
       "id": "alertservice_getstreaklength",
-      "community": 12,
+      "community": 2,
       "norm_label": "getstreaklength()"
     },
     {
@@ -2142,7 +2151,7 @@
       "source_file": "backend/src/alertService.ts",
       "source_location": "L99",
       "id": "alertservice_evaluatealerts",
-      "community": 12,
+      "community": 2,
       "norm_label": "evaluatealerts()"
     },
     {
@@ -2369,15 +2378,6 @@
       "id": "backend_src_types_ts",
       "community": 2,
       "norm_label": "types.ts"
-    },
-    {
-      "label": "index.ts",
-      "file_type": "code",
-      "source_file": "backend/src/index.ts",
-      "source_location": "L1",
-      "id": "backend_src_index_ts",
-      "community": 1,
-      "norm_label": "index.ts"
     },
     {
       "label": "server.ts",
@@ -2664,7 +2664,7 @@
       "source_file": "backend/src/services/categorySuggestionService.ts",
       "source_location": "L1",
       "id": "backend_src_services_categorysuggestionservice_ts",
-      "community": 2,
+      "community": 6,
       "norm_label": "categorysuggestionservice.ts"
     },
     {
@@ -2673,7 +2673,7 @@
       "source_file": "backend/src/services/categorySuggestionService.ts",
       "source_location": "L13",
       "id": "categorysuggestionservice_tofrequencymap",
-      "community": 2,
+      "community": 6,
       "norm_label": "tofrequencymap()"
     },
     {
@@ -2682,7 +2682,7 @@
       "source_file": "backend/src/services/categorySuggestionService.ts",
       "source_location": "L21",
       "id": "categorysuggestionservice_suggestcategory",
-      "community": 2,
+      "community": 6,
       "norm_label": "suggestcategory()"
     },
     {
@@ -2691,7 +2691,7 @@
       "source_file": "backend/src/services/categorySuggestionService.ts",
       "source_location": "L54",
       "id": "categorysuggestionservice_buildmerchanthints",
-      "community": 2,
+      "community": 6,
       "norm_label": "buildmerchanthints()"
     },
     {
@@ -2700,7 +2700,7 @@
       "source_file": "backend/src/services/categorySuggestionService.ts",
       "source_location": "L76",
       "id": "categorysuggestionservice_buildrecententryhelpers",
-      "community": 2,
+      "community": 6,
       "norm_label": "buildrecententryhelpers()"
     },
     {
@@ -5222,6 +5222,30 @@
     {
       "relation": "imports_from",
       "confidence": "EXTRACTED",
+      "source_file": "backend/api/index.ts",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_src": "backend_api_index_ts",
+      "_tgt": "backend_src_config_db_ts",
+      "source": "backend_api_index_ts",
+      "target": "backend_src_config_db_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "backend/api/index.ts",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_src": "backend_api_index_ts",
+      "_tgt": "backend_src_app_ts",
+      "source": "backend_api_index_ts",
+      "target": "backend_src_app_ts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
       "source_file": "backend/src/app.ts",
       "source_location": "L38",
       "weight": 1.0,
@@ -6554,18 +6578,6 @@
     {
       "relation": "imports_from",
       "confidence": "EXTRACTED",
-      "source_file": "backend/src/index.ts",
-      "source_location": "L2",
-      "weight": 1.0,
-      "_src": "backend_src_index_ts",
-      "_tgt": "backend_src_app_ts",
-      "source": "backend_src_app_ts",
-      "target": "backend_src_index_ts",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "confidence": "EXTRACTED",
       "source_file": "backend/src/server.ts",
       "source_location": "L3",
       "weight": 1.0,
@@ -6933,18 +6945,6 @@
       "_tgt": "backend_src_types_ts",
       "source": "backend_src_types_ts",
       "target": "backend_src_services_bulkimportservice_ts",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "confidence": "EXTRACTED",
-      "source_file": "backend/src/index.ts",
-      "source_location": "L1",
-      "weight": 1.0,
-      "_src": "backend_src_index_ts",
-      "_tgt": "backend_src_config_db_ts",
-      "source": "backend_src_index_ts",
-      "target": "backend_src_config_db_ts",
       "confidence_score": 1.0
     },
     {
