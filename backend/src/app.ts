@@ -6,6 +6,8 @@ import { randomUUID } from "node:crypto";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import * as helmetModule from "helmet";
+import type { HelmetOptions } from "helmet";
+import type { RequestHandler } from "express";
 import { rateLimit } from "express-rate-limit";
 import { slowDown } from "express-slow-down";
 import { evaluateAlerts } from "./alertService.js";
@@ -476,8 +478,11 @@ function buildInsightsPayload(transactions: Transaction[], rules: BudgetRule[]) 
 }
 
 export const app = express();
+
+/** Helmet default interop: TS 6 + NodeNext can type `default` as the module object on some installs. */
+const helmet = helmetModule.default as (options?: Readonly<HelmetOptions>) => RequestHandler;
 app.use(
-  helmetModule.default({
+  helmet({
     contentSecurityPolicy: false,
   }),
 );
