@@ -190,4 +190,30 @@ describe("alertService", () => {
     expect(alerts.some((alert) => alert.ruleId === "r4")).toBe(true);
     expect(alerts.some((alert) => alert.ruleId === "r5")).toBe(true);
   });
+
+  it("produces stable ids for repeated alert evaluations", () => {
+    const transactions: Transaction[] = [
+      {
+        id: "1",
+        date: "2026-04-16",
+        amount: 70,
+        flow: "expense",
+        category: "Food",
+        description: "Lunch",
+        normalizedMerchant: "lunch",
+        scope: "personal",
+        createdAt: "2026-04-16T09:00:00Z",
+        updatedAt: "2026-04-16T09:00:00Z",
+      },
+    ];
+    const rules: BudgetRule[] = [
+      { id: "r1", period: "monthly", threshold: 50, ruleType: "category_cap", category: "Food", enabled: true },
+    ];
+
+    const recurring = detectRecurringGroups(transactions);
+    const first = evaluateAlerts(transactions, rules, recurring);
+    const second = evaluateAlerts(transactions, rules, recurring);
+
+    expect(first.map((alert) => alert.id)).toEqual(second.map((alert) => alert.id));
+  });
 });

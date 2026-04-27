@@ -171,7 +171,7 @@ export function Pacing({ size, data }) {
         <div className="w-8 h-8 rounded-lg bg-moss-soft text-moss flex items-center justify-center"><Gauge size={15} /></div>
         <div className="min-w-0">
           <div className="font-heading font-medium text-sm">Budget pacing</div>
-          <div className="text-[11px] text-[color:var(--text-secondary)]">{Math.round(pacing.month_pct)}% of month done</div>
+          <div className="text-[11px] text-[color:var(--text-secondary)]">Each budget compares spend with its current period progress.</div>
         </div>
         <Link to="/budgets" className="ml-auto text-xs text-moss hover:underline">Manage</Link>
       </div>
@@ -179,6 +179,8 @@ export function Pacing({ size, data }) {
         {pacing.budgets.slice(0, max).map(b => {
           const s = statusMap[b.status] || statusMap.on_track;
           const tc = s.tone === "terra" ? "text-terracotta bg-terracotta-soft" : s.tone === "warn" ? "text-[#B37E1E] bg-[#FFF5E6]" : "text-moss bg-moss-soft";
+          const markerPct = Math.min(100, b.period_pct ?? pacing.month_pct ?? 0);
+          const periodLabel = b.period_label === "daily" ? "day" : b.period_label === "weekly" ? "week" : "month";
           return (
             <div key={b.budget_id} className="p-2.5 rounded-lg border border-sand-200" data-testid={`pacing-${b.budget_id}`}>
               <div className="flex items-center justify-between gap-2">
@@ -187,8 +189,9 @@ export function Pacing({ size, data }) {
               </div>
               <div className="mt-1.5 relative h-1 bg-sand-100 rounded-full overflow-hidden">
                 <div className={`h-full absolute top-0 left-0 ${s.tone === "terra" ? "bg-terracotta" : s.tone === "warn" ? "bg-[#B37E1E]" : "bg-moss"}`} style={{ width: `${Math.min(100, b.used_pct)}%` }} />
-                <div className="absolute top-0 bottom-0 w-[1.5px] bg-[color:var(--text-primary)]/40" style={{ left: `${pacing.month_pct}%` }} />
+                <div className="absolute top-0 bottom-0 w-[1.5px] bg-[color:var(--text-primary)]/40" style={{ left: `${markerPct}%` }} />
               </div>
+              {size !== "s" && <div className="mt-1 text-[10px] text-[color:var(--text-secondary)]">{Math.round(markerPct)}% of {periodLabel} elapsed</div>}
             </div>
           );
         })}

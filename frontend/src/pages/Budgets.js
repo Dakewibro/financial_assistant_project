@@ -13,6 +13,8 @@ import { toast } from "sonner";
 
 const PACE_LABEL = { on_track: "On track", slightly_fast: "Slightly fast", fast: "Ahead of pace", over: "Over budget", under: "Under pace" };
 const PACE_TONE = { on_track: "moss", slightly_fast: "warn", fast: "terra", over: "terra", under: "moss" };
+const PACE_PERIOD = { daily: "day", weekly: "week", monthly: "month" };
+const PACE_CONTEXT = { daily: "today", weekly: "this week", monthly: "this month" };
 
 export default function Budgets() {
   const [items, setItems] = useState([]);
@@ -20,7 +22,7 @@ export default function Budgets() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", category: "Food & Dining", account: "personal", limit: "" });
+  const [form, setForm] = useState({ name: "", category: "Food", account: "personal", limit: "" });
   const [categories, setCategories] = useState([]);
   const [saving, setSaving] = useState(false);
   const [formErr, setFormErr] = useState("");
@@ -51,7 +53,7 @@ export default function Budgets() {
       await api.post("/budgets", { ...form, limit: lim });
       toast.success("Budget created");
       setOpen(false);
-      setForm({ name: "", category: "Food & Dining", account: "personal", limit: "" });
+      setForm({ name: "", category: "Food", account: "personal", limit: "" });
       load();
     } catch (e) { setFormErr(formatApiError(e)); }
     finally { setSaving(false); }
@@ -94,6 +96,10 @@ export default function Budgets() {
             const paceTone = PACE_TONE[paceStatus];
             const paceBg = paceTone === "terra" ? "bg-terracotta-soft text-terracotta" : paceTone === "warn" ? "bg-[#FFF5E6] text-[#B37E1E]" : "bg-moss-soft text-moss";
             const overAmt = pace?.over_amount || 0;
+            const pacePeriod = pace?.period_label || "monthly";
+            const paceMarkerPct = Math.min(100, pace?.period_pct ?? pacing?.month_pct ?? 0);
+            const pacePeriodLabel = PACE_PERIOD[pacePeriod] || "period";
+            const paceContextLabel = PACE_CONTEXT[pacePeriod] || "this period";
             const members = b.members || [];
             const isShared = b.is_shared || members.length > 1;
             const isOwner = b.is_owner !== false;
@@ -124,16 +130,16 @@ export default function Budgets() {
                 </div>
                 <div className="mt-3 relative h-2 rounded-full bg-sand-100 overflow-hidden">
                   <div className={`h-full absolute top-0 left-0 transition-all ${tone === "terra" ? "bg-terracotta" : tone === "warn" ? "bg-[#B37E1E]" : "bg-moss"}`} style={{ width: `${Math.min(100, pct)}%` }} />
-                  {pacing?.month_pct != null && (
-                    <div className="absolute top-0 bottom-0 w-[2px] bg-[color:var(--text-primary)]/50" style={{ left: `${pacing.month_pct}%` }} title={`Month progress ${Math.round(pacing.month_pct)}%`} />
+                  {(pace?.period_pct != null || pacing?.month_pct != null) && (
+                    <div className="absolute top-0 bottom-0 w-[2px] bg-[color:var(--text-primary)]/50" style={{ left: `${paceMarkerPct}%` }} title={`${pacePeriodLabel} progress ${Math.round(paceMarkerPct)}%`} />
                   )}
                 </div>
                 <div className="flex items-center gap-1.5 mt-2 text-[11px] text-[color:var(--text-secondary)]">
-                  <Gauge size={11} /> {Math.round(pacing?.month_pct || 0)}% of month done
+                  <Gauge size={11} /> {Math.round(paceMarkerPct)}% of {pacePeriodLabel} elapsed
                 </div>
                 {overAmt > 0 && paceStatus !== "over" && (
                   <div className="mt-3 text-xs text-[#B37E1E] bg-[#FFF5E6] rounded-md px-2.5 py-1.5" data-testid={`pace-hint-${b.id}`}>
-                    Slow by <span className="font-num font-medium">{HKD(overAmt)}</span> this week to return to pace.
+                    Slow by <span className="font-num font-medium">{HKD(overAmt)}</span> {paceContextLabel} to return to pace.
                   </div>
                 )}
                 {pct >= 100 && <div className="mt-3 text-xs text-terracotta bg-terracotta-soft rounded-md px-2.5 py-1.5" data-testid="budget-over">Over budget — check Alerts for resolution steps.</div>}

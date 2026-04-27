@@ -1,9 +1,13 @@
 import dayjs from "dayjs";
 import isoWeek from "dayjs/plugin/isoWeek.js";
-import { randomUUID } from "node:crypto";
+import { createHash } from "node:crypto";
 import { countsAsExpense, type Alert, type BudgetRule, type RecurringGroup, type Transaction } from "./types.js";
 
 dayjs.extend(isoWeek);
+
+function stableAlertId(...parts: string[]): string {
+  return createHash("sha1").update(parts.join("|")).digest("hex").slice(0, 16);
+}
 
 function createAlert(
   rule: BudgetRule,
@@ -13,7 +17,7 @@ function createAlert(
   status: Alert["status"],
 ): Alert {
   return {
-    id: randomUUID(),
+    id: stableAlertId(rule.id, rule.ruleType, severity, status, message, evidence),
     ruleId: rule.id,
     ruleType: rule.ruleType,
     message,
@@ -202,7 +206,13 @@ export function evaluateAlerts(transactions: Transaction[], rules: BudgetRule[],
     const sample = list[0];
     const severity: Alert["severity"] = list.length >= 5 ? "critical" : "warning";
     alerts.push({
-      id: randomUUID(),
+      id: stableAlertId(
+        "duplicate-amount",
+        sample.normalizedMerchant,
+        Number(sample.amount).toFixed(2),
+        String(list.length),
+        severity,
+      ),
       ruleId: "duplicate-amount",
       ruleType: "duplicate_amount",
       message: `Same HK$${sample.amount.toFixed(2)} charge ${list.length} times (${sample.description})`,

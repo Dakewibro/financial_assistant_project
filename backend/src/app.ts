@@ -29,6 +29,7 @@ import {
 import { buildRecentEntryHelpers } from "./services/categorySuggestionService.js";
 import { suggestCategory as suggestCategoryFromHistory } from "./services/categorySuggestionService.js";
 import { generateInsights } from "./services/insightService.js";
+import { getPaceStatus, getPeriodProgressPct, type PaceStatus } from "./services/pacingService.js";
 import { detectRecurringGroups } from "./services/recurringService.js";
 import { computeSummary } from "./summaryService.js";
 import {
@@ -83,7 +84,7 @@ const users: AuthUser[] = [
     primaryUse: "mixed",
   },
 ];
-const acknowledgedAlertIds = new Set<string>();
+const acknowledgedAlertIdsByActor = new Map<string, Set<string>>();
 
 function originAllowed(origin: string | undefined): boolean {
   if (!origin) return true;
@@ -169,6 +170,21 @@ async function attachAuthUser(req: express.Request, res: express.Response, next:
 
 function getAuthUser(req: express.Request): AuthUser | null {
   return (req as RequestWithAuthUser).authUser ?? null;
+}
+
+function getAlertAckActorKey(req: express.Request): string {
+  const user = getAuthUser(req);
+  return user?.id ?? "__anonymous__";
+}
+
+function getAcknowledgedAlertIds(req: express.Request): Set<string> {
+  const actorKey = getAlertAckActorKey(req);
+  let ids = acknowledgedAlertIdsByActor.get(actorKey);
+  if (!ids) {
+    ids = new Set<string>();
+    acknowledgedAlertIdsByActor.set(actorKey, ids);
+  }
+  return ids;
 }
 
 function maybeRequireAuth(req: express.Request, res: express.Response) {
@@ -418,13 +434,11 @@ function buildInsightsPayload(transactions: Transaction[], rules: BudgetRule[]) 
   const recurring = detectRecurringGroups(transactions);
   const alerts = evaluateAlerts(transactions, rules, recurring);
   const summary = computeSummary(transactions);
-  const now = new Date();
-  const monthDays = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  const daysElapsed = now.getDate();
-  const monthPct = (daysElapsed / monthDays) * 100;
+  const now = dayjs();
+  const monthPct = getPeriodProgressPct("monthly", now);
   const monthlyLimits = rules.filter((rule) => rule.period === "monthly").reduce((sum, rule) => sum + rule.threshold, 0);
   const remainingBudget = Math.max(0, monthlyLimits - summary.monthlyTotal);
-  const daysRemaining = Math.max(1, monthDays - daysElapsed);
+  const daysRemaining = Math.max(1, now.daysInMonth() - now.date());
   const safeToSpendDaily = remainingBudget / daysRemaining;
   const byCategory = Object.entries(summary.perCategoryTotals)
     .map(([category, amount]) => ({ category, amount }))
@@ -434,9 +448,11 @@ function buildInsightsPayload(transactions: Transaction[], rules: BudgetRule[]) 
   const pacingBudgets: Array<{
     budget_id: string;
     name: string;
-    status: "on_track" | "slightly_fast" | "fast" | "over" | "under";
+    status: PaceStatus;
     used_pct: number;
     over_amount: number;
+    period_label: BudgetRule["period"];
+    period_pct: number;
   }> = [];
 
   for (const rule of rules.filter((r) => r.enabled)) {
@@ -445,14 +461,16 @@ function buildInsightsPayload(transactions: Transaction[], rules: BudgetRule[]) 
       const periodTxs = scoped.filter((tx) => txMatchesBudgetPeriod(tx, rule.period)).filter(countsAsExpense);
       const spent = periodTxs.filter((tx) => tx.category === rule.category).reduce((sum, tx) => sum + tx.amount, 0);
       const usedPct = rule.threshold > 0 ? (spent / rule.threshold) * 100 : 0;
-      const delta = usedPct - monthPct;
-      const status = delta > 25 ? "over" : delta > 10 ? "fast" : delta > 4 ? "slightly_fast" : delta < -8 ? "under" : "on_track";
+      const periodPct = getPeriodProgressPct(rule.period, now);
+      const status = getPaceStatus(usedPct, periodPct);
       pacingBudgets.push({
         budget_id: rule.id,
         name: rule.category,
         status,
         used_pct: Number(usedPct.toFixed(2)),
         over_amount: status === "over" ? Number((spent - rule.threshold).toFixed(2)) : 0,
+        period_label: rule.period,
+        period_pct: Number(periodPct.toFixed(2)),
       });
     }
     if (rule.ruleType === "period_cap") {
@@ -460,8 +478,8 @@ function buildInsightsPayload(transactions: Transaction[], rules: BudgetRule[]) 
       const periodTxs = scoped.filter((tx) => txMatchesBudgetPeriod(tx, rule.period)).filter(countsAsExpense);
       const spent = periodTxs.reduce((sum, tx) => sum + tx.amount, 0);
       const usedPct = rule.threshold > 0 ? (spent / rule.threshold) * 100 : 0;
-      const delta = usedPct - monthPct;
-      const status = delta > 25 ? "over" : delta > 10 ? "fast" : delta > 4 ? "slightly_fast" : delta < -8 ? "under" : "on_track";
+      const periodPct = getPeriodProgressPct(rule.period, now);
+      const status = getPaceStatus(usedPct, periodPct);
       const periodLabel = rule.period === "daily" ? "Daily" : rule.period === "weekly" ? "Weekly" : "Monthly";
       pacingBudgets.push({
         budget_id: rule.id,
@@ -469,6 +487,8 @@ function buildInsightsPayload(transactions: Transaction[], rules: BudgetRule[]) 
         status,
         used_pct: Number(usedPct.toFixed(2)),
         over_amount: status === "over" ? Number((spent - rule.threshold).toFixed(2)) : 0,
+        period_label: rule.period,
+        period_pct: Number(periodPct.toFixed(2)),
       });
     }
     if (rule.ruleType === "category_percentage" && rule.category) {
@@ -481,14 +501,16 @@ function buildInsightsPayload(transactions: Transaction[], rules: BudgetRule[]) 
           .reduce((sum, tx) => sum + tx.amount, 0);
         const ratio = (categoryAmount / periodAmount) * 100;
         const usedPct = ratio;
-        const delta = usedPct - monthPct;
-        const status = delta > 25 ? "over" : delta > 10 ? "fast" : delta > 4 ? "slightly_fast" : delta < -8 ? "under" : "on_track";
+        const periodPct = getPeriodProgressPct(rule.period, now);
+        const status = getPaceStatus(usedPct, periodPct);
         pacingBudgets.push({
           budget_id: rule.id,
           name: `${rule.category} % of spend`,
           status,
           used_pct: Number(usedPct.toFixed(2)),
           over_amount: 0,
+          period_label: rule.period,
+          period_pct: Number(periodPct.toFixed(2)),
         });
       }
     }
@@ -917,6 +939,7 @@ app.post("/api/rules", async (req, res) => {
   const parsed = budgetRuleSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const rule = await createRule(parsed.data);
+  await refreshBudgetsFromRules();
   return res.status(201).json(rule);
 });
 
@@ -1254,6 +1277,7 @@ app.get("/api/alerts", async (_req, res) => {
   if (auth.required && !auth.user) return;
   const [transactions, rules] = await Promise.all([listTransactions(), listRules()]);
   const recurring = detectRecurringGroups(transactions);
+  const acknowledgedAlertIds = getAcknowledgedAlertIds(_req);
   res.json(
     evaluateAlerts(transactions, rules, recurring).map((alert) => ({
       ...alert,
@@ -1267,7 +1291,7 @@ app.get("/api/alerts", async (_req, res) => {
 app.post("/api/alerts/:id/ack", async (req, res) => {
   const auth = maybeRequireAuth(req, res);
   if (auth.required && !auth.user) return;
-  acknowledgedAlertIds.add(req.params.id);
+  getAcknowledgedAlertIds(req).add(req.params.id);
   res.json({ ok: true, id: req.params.id });
 });
 
@@ -1392,7 +1416,7 @@ app.post("/api/demo/clear", async (req, res) => {
   await replaceStore({ transactions: [], rules: [], categories: [...DEFAULT_CATEGORIES] });
   await refreshBudgetsFromRules();
   goals.splice(0, goals.length);
-  acknowledgedAlertIds.clear();
+  acknowledgedAlertIdsByActor.clear();
   shareIndex.clear();
   dashboardPrefs.clear();
   touchWorkspace();
@@ -1506,7 +1530,7 @@ app.post("/api/demo/load-scenario", async (req, res) => {
     const targetLast = dayjs().subtract(1, "day").format("YYYY-MM-DD");
     const body = alignScenarioFileDatesForDemoLoad(raw, targetLast);
     await importPayload(body);
-    acknowledgedAlertIds.clear();
+    acknowledgedAlertIdsByActor.clear();
     if (id === "freelancer-month" || id === "household-side-hustle") {
       clearGoalShareTokens();
       goals.splice(0, goals.length);
