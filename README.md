@@ -2,7 +2,7 @@
 
 Financial Assistant is a full-stack budgeting app for the COMP1110 Topic A project. It combines a React frontend with a TypeScript/Express API for tracking transactions, enforcing budget rules, surfacing alerts, detecting recurring spend, and loading reproducible scenario packs from this repository.
 
-Public frontend: [financial-assistant-project-dakewibros-projects.vercel.app](https://financial-assistant-project-dakewibros-projects.vercel.app/)
+Public frontend: [financial-assistant-project-dakewibros-projects.vercel.app](https://financial-assistant-project-dakewibros-projects.vercel.app?_vercel_share=sCLBZrf5QitzXknt8CoFizzmoN23DDgP)
 
 ## Current Feature Set
 
